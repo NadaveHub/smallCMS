@@ -44,7 +44,17 @@
 
       <ul class="nav flex-column mb-3">
         <li class="nav-item">
-          <a class="nav-link d-flex align-items-center gap-2 text-danger" href="logout.php">
+          <a class="nav-link d-flex align-items-center gap-2 text-warning" href="/composables/logoutMain.php">
+            <i class="bi bi-door-closed"></i> Go to main Page
+          </a>
+        </li>
+      </ul>
+
+      <hr class="my-3" />
+
+      <ul class="nav flex-column mb-3">
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2 text-danger" href="/composables/logout.php">
             <i class="bi bi-door-closed"></i> Sign out
           </a>
         </li>

@@ -1,8 +1,11 @@
 <?php
 function val()
 {
-    if (!isset($_SESSION['loged']) or $_SESSION['loged'] == false) {
-        session_destroy();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!isset($_SESSION['loged']) or $_SESSION['loged'] !== true) {
+        unset($_SESSION['loged']);
         header("location:/pages/loginPage.php");
         exit();
     }

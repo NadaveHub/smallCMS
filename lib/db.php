@@ -1,7 +1,7 @@
 <?php
 define('DB_NAME', 'minecraft');
-define('DB_USER', 'root');
-define('DB_PASSWORD', 'root');
+define('DB_USER', 'mc');
+define('DB_PASSWORD', 'UxaiD*l(BlaPDuR-');
 define('DB_HOST', 'mysql');
 
 global $db;

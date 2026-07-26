@@ -1,5 +1,3 @@
-/* globals Chart:false */
-
 (() => {
   'use strict'
 
@@ -7,11 +5,8 @@
   new Chart(ctx, {
     type: 'line',
     data: {
-      labels: [
-        'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
-      ],
+      labels: dynamicChartLabels, 
       datasets: [{
-        // Use the JavaScript variable populated by PHP
         data: dynamicChartData, 
         lineTension: 0,
         backgroundColor: 'transparent',

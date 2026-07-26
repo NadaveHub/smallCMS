@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-include "../composables/loginFun.php";
+require_once "../composables/loginFun.php";
 ?>
 
 <!DOCTYPE html>
@@ -16,7 +16,7 @@ include "../composables/loginFun.php";
 
 <body>
     <H1>LOGIN</H1>
-    <?php login($db) ?>
+
     <form method="POST" action="">
         <label for="email">email</label><br>
         <input type="text" id="email" name="email" required value="<?php echo isset($_GET['email']) ? htmlspecialchars($_GET['email']) : ''; ?>"><br><br>

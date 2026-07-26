@@ -1,18 +1,20 @@
 <?php
 session_start();
-include "../composables/loginFun.php";
-include "../composables/check.php";
-val();
+require_once "../composables/loginFun.php";
+
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <H1>REGISTER</H1>
     <form method="POST" action="">
@@ -31,4 +33,5 @@ val();
     <br>
     <a class="switch" href="loginPage.php">LOGIN</a>
 </body>
+
 </html>
