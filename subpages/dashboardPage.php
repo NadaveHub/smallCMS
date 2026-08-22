@@ -30,7 +30,7 @@ $dbResults = getDayUsers($db);
 $loginData = array_column($dbResults, 'unique_users', 'log_date');
 $chartData = [];
 
-for ($i = $_SESSION["dayList"]; $i > 0; $i--) {
+for ($i = $_SESSION["dayList"] - 1; $i >= 0; $i--) {
   $date = date('Y-m-d', strtotime("-$i days"));
   $chartLabels[] = date('M d', strtotime($date));
   $chartData[] = [

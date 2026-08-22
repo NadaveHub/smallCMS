@@ -31,6 +31,13 @@ require_once "../composables/loginFun.php";
         <input class="submit" type="submit" value="REGISTER" name="job">
     </form>
     <br>
+        <?php   
+            $error = $_GET['error'] ?? null;
+            if (isset($error)) {
+                echo ($error);
+            }
+        ?>
+    <br>
     <a class="switch" href="loginPage.php">LOGIN</a>
 </body>
 

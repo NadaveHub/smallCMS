@@ -9,11 +9,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'sales' ? 'active' : '' ?>" href="index.php?page=sales">
-            <i class="bi bi-cart"></i> Sales
-          </a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'accounts' ? 'active' : '' ?>" href="index.php?page=accounts">
             <i class="bi bi-people"></i> Accounts
           </a>
