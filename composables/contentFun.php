@@ -1,68 +1,78 @@
 <?php
-function sendContentText($userIDF, $contentF, $db)
+function sendText($userID, $content, $name, $db)
 {
-
-    $countsql = "INSERT INTO defContent (type, userID, content) VALUES ('text', :userIDP, :contentP)";
+    $countsql = "INSERT INTO textContent (name, userID, content) VALUES (:name, :userID, :content)";
     $con = $db->prepare($countsql);
 
-    $con->bindValue(":userIDP", $userIDF, PDO::PARAM_INT);
-    $con->bindValue(":contentP", $contentF, PDO::PARAM_STR);
+    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
+    $con->bindValue(":content", $content, PDO::PARAM_STR);
+    $con->bindValue(":name", $name, PDO::PARAM_STR);
 
     $con->execute();
-    exit;
+    return true;
 }
 
-function sendContentCard($userIDF, $contentF, $db)
+function sendCard($userID, $content, $name, $prefix, $db)
 {
-
-    $countsql = "INSERT INTO defContent (type, userID, content) VALUES ('card', :userIDP, :contentP)";
+    $countsql = "INSERT INTO cardContent (name, userID, content, prefix) VALUES (:name, :userID, :content, :prefix)";
     $con = $db->prepare($countsql);
 
-    $con->bindValue(":userIDP", $userIDF, PDO::PARAM_INT);
-    $con->bindValue(":contentP", $contentF, PDO::PARAM_STR);
+    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
+    $con->bindValue(":content", $content, PDO::PARAM_STR);
+    $con->bindValue(":name", $name, PDO::PARAM_STR);
+    $con->bindValue(":prefix", $prefix, PDO::PARAM_STR);
 
     $con->execute();
-    exit;
+    return true;
 }
 
-function sendContentList($userIDF, $contentF, $db)
+function sendList($userID, $content, $name, $prefix, $highlight, $db)
 {
-
-    $countsql = "INSERT INTO defContent (type, userID, content) VALUES ('list', :userIDP, :contentP)";
+    $countsql = "INSERT INTO listContent (name, userID, content, prefix, highlight) VALUES (:name, :userID, :content, :prefix, :highlight)";
     $con = $db->prepare($countsql);
 
-    $con->bindValue(":userIDP", $userIDF, PDO::PARAM_INT);
-    $con->bindValue(":contentP", $contentF, PDO::PARAM_STR);
+    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
+    $con->bindValue(":content", $content, PDO::PARAM_STR);
+    $con->bindValue(":name", $name, PDO::PARAM_STR);
+    $con->bindValue(":prefix", $prefix, PDO::PARAM_STR);
+    $con->bindValue(":highlight", $highlight, PDO::PARAM_INT);
 
     $con->execute();
-    exit;
+    return true;
 }
 
-function textProc()
+function textProc($db)
 {
-    echo '
+    if (isset($_POST['action']) && $_POST['action'] === 'saveText') {
+        $name = $_POST['Name'] ?? '';
+        $content = $_POST['content'] ?? '';
+
+        sendText($_SESSION['activeUser'], $content, $name, $db);
+        echo "<h3 style='color: green;'>Text Saved!</h3>";
+    }
+?>
     <form method="POST" action="">
         <input type="hidden" name="contentType" value="text">
-        <label for="title">Title:</label><br>
-        <input type="text" id="title" name="title" placeholder="Enter title..." required><br><br>
+        <label for="title">Name:</label><br>
+        <input type="text" id="Name" name="Name" placeholder="Enter Name..." required><br><br>
         <label for="content">Enter Content:</label><br>
 
         <textarea id="content" name="content" rows="8" cols="50" placeholder="Type your text here..."></textarea>
         <br><br>
-        <input type="submit" value="Submit">
+        <button type="submit" name="action" value="saveText">Submit Text</button>
     </form>
-    ';
+<?php
 }
 
-function cardProc()
+function cardProc($db)
 {
     if (isset($_POST['action']) && $_POST['action'] === 'save') {
         $title = $_POST['title'] ?? '';
         $prefix = $_POST['prefix'] ?? '';
         $content = $_POST['content'] ?? '';
 
-        echo "<h3>Card Saved!</h3>";
-        echo "Title: " . htmlspecialchars($title) . "<br>";
+        sendCard($_SESSION['activeUser'], $content, $title, $prefix, $db);
+        echo "<h3 style='color: green;'>Card Saved!</h3>";
     }
 
 ?>
@@ -84,7 +94,7 @@ function cardProc()
 }
 
 
-function listProc()
+function listProc($db)
 {
     $num_rows = isset($_POST['num_rows']) ? (int)$_POST['num_rows'] : 2;
     $num_cols = isset($_POST['num_cols']) ? (int)$_POST['num_cols'] : 2;
@@ -92,7 +102,7 @@ function listProc()
     $name   = $_POST['list_name'] ?? '';
     $prefix = $_POST['list_prefix'] ?? '';
     $data   = $_POST['list_data'] ?? [];
-
+    $highlight = isset($_POST['highlight']) ? 1 : 0;
     $action = $_POST['action'] ?? '';
 
     if ($action === 'add_row') {
@@ -104,10 +114,10 @@ function listProc()
     } elseif ($action === 'rem_col' && $num_cols > 1) {
         $num_cols--;
     } elseif ($action === 'save') {
-        echo "<h3>Saved Variables Output:</h3>";
-        echo "<b>Name:</b> " . htmlspecialchars($name) . "<br>";
-        echo "<b>Prefix:</b> " . htmlspecialchars($prefix) . "<br>";
-        echo "<b>Data Array:</b> <pre>" . print_r($data, true) . "</pre><hr>";
+        $json_content = json_encode($data);
+        sendList($_SESSION['activeUser'], $json_content, $name, $prefix, $highlight, $db);
+
+        echo "<h3 style='color: green;'>List successfully saved to the database!</h3>";
     }
 
 ?>
@@ -146,7 +156,9 @@ function listProc()
         <button type="submit" name="action" value="rem_col">Remove Last Column</button>
 
         <br><br>
-
+        <label>
+            <input type="checkbox" name="highlight" value="1">. Hightlight top row as name of column
+        </label><br><br>
         <button type="submit" name="action" value="save">Save Final List</button>
     </form>
 <?php

@@ -18,11 +18,11 @@ $contentType = $_POST['contentType'] ?? 'text';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($contentType === "text") {
-        textProc();
+        textProc($db);
     } elseif ($contentType === "card") {
-        cardProc();
+        cardProc($db);
     } elseif ($contentType === "list") {
-        listProc();
+        listProc($db);
     } else {
         echo "jsi kkt";
     }
