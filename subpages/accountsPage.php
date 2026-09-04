@@ -39,7 +39,7 @@ function datatable($db)
     }
     echo "</table>";
 }
-
+ 
 ?>
 <div>
     <?php

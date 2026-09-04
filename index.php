@@ -3,8 +3,6 @@ include "lib/lib.php";
 session_start();
 val();
 
-
-
 $page = $_GET['page'] ?? 'dashboard';
 $page = basename($page);
 
@@ -20,7 +18,6 @@ include 'components/headerCom.php'; ?>
 </head>
 
 <body>
-
 
   <div class="container-fluid">
     <div class="row">
@@ -44,4 +41,3 @@ include 'components/headerCom.php'; ?>
 </body>
 
 </html>
-<?php include 'components/footerCom.php'; ?>

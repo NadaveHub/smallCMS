@@ -14,13 +14,23 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'adminAccounts' ? 'active' : '' ?>" href="index.php?page=adminAccounts">
+            <i class="bi bi-people"></i>Admin Accounts
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'bans' ? 'active' : '' ?>" href="index.php?page=bans">
             <i class="bi bi-slash-circle"></i> Bans
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'content' ? 'active' : '' ?>" href="index.php?page=content">
-            <i class="bi bi-file-earmark-text"></i> Content
+          <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'addContent' ? 'active' : '' ?>" href="index.php?page=addContent">
+            <i class="bi bi-file-earmark-text"></i>ADD Content
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'editContent' ? 'active' : '' ?>" href="index.php?page=editContent">
+            <i class="bi bi-file-earmark-text"></i>EDIT Content
           </a>
         </li>
         <li class="nav-item">
@@ -29,7 +39,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'other_settings' ? 'active' : '' ?>" href="index.php?page=other_settings">
+          <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'otherSettings' ? 'active' : '' ?>" href="index.php?page=otherSettings">
             <i class="bi bi-gear"></i> other Settings
           </a>
         </li>

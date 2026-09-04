@@ -32,7 +32,7 @@ function check($email, $password, $db)
 
 function register($email, $password, $db)
 {
-    if (!checkMail("usersAuth", $email, $db)) {
+    if (!checkMail($email, $db) && valPassword($password)) {
         $countsql = "INSERT INTO usersAuth (id, password, email) VALUES (NULL, :password, :email)";
         $con = $db->prepare($countsql);
         $con->bindValue(":email", $email, PDO::PARAM_STR);

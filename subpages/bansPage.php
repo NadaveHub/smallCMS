@@ -9,7 +9,7 @@ function getUsers($db)
 }
 function pagecounter($db)
 {
-    $countsql = "SELECT COUNT(*) FROM `usersAuth`";
+    $countsql = "SELECT COUNT(*) FROM `banLog`";
     $con = $db->prepare($countsql);
     $con->execute();
 

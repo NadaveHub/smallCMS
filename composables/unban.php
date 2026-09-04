@@ -8,7 +8,7 @@ function delete($db, $id)
     $con->bindValue(":id", $id, PDO::PARAM_INT);
     $stav = $con->execute();
     $over = $con->rowCount();
-    header("location:../    index.php?page=bans");
+    header("location:/index.php?page=bans");
     exit;
 }
 
