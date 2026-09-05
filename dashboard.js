@@ -2,28 +2,31 @@
   'use strict'
 
   const ctx = document.getElementById('myChart')
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: dynamicChartLabels, 
-      datasets: [{
-        data: dynamicChartData, 
-        lineTension: 0,
-        backgroundColor: 'transparent',
-        borderColor: '#007bff',
-        borderWidth: 4,
-        pointBackgroundColor: '#007bff'
-      }]
-    },
-    options: {
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          boxPadding: 3
+  
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: dynamicChartLabels, 
+        datasets: [{
+          data: dynamicChartData, 
+          lineTension: 0,
+          backgroundColor: 'transparent',
+          borderColor: '#007bff',
+          borderWidth: 4,
+          pointBackgroundColor: '#007bff'
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            boxPadding: 3
+          }
         }
       }
-    }
-  })
+    })
+  }
 })()

@@ -18,8 +18,8 @@ require_once "../composables/loginFun.php";
     <H1>LOGIN</H1>
 
     <form method="POST" action="">
-        <label for="email">email</label><br>
-        <input type="text" id="email" name="email" required value="<?php echo isset($_GET['email']) ? htmlspecialchars($_GET['email']) : ''; ?>"><br><br>
+        <label for="username">username</label><br>
+        <input type="text" id="username" name="username" required value="<?php echo isset($_GET['username']) ? htmlspecialchars($_GET['username']) : ''; ?>"><br><br>
 
         <label for="pass">password</label><br>
         <input type="password" id="password" name="password"><br><br>
@@ -27,8 +27,6 @@ require_once "../composables/loginFun.php";
         <input class="submit" type="submit" value="LOGIN" name="job">
     </form>
     <br>
-    <a class="switch" href="registerPage.php">REGISTER</a>
-
     <?php
     if (isset($_GET["message"])) {
         echo $_GET['message'];

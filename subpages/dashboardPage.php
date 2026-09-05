@@ -7,7 +7,11 @@ if (!isset($_SESSION["dayList"])) {
 
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
   if (isset($_POST['dayList'])) {
-    $_SESSION["dayList"] = $_POST['dayList'];
+    if ($_POST['dayList'] < 0) {
+      $_SESSION["dayList"] = 0;
+    } else {
+      $_SESSION["dayList"] = $_POST['dayList'];
+    }
   }
 }
 
@@ -68,6 +72,7 @@ foreach ($chartData as $data) {
   const dynamicChartLabels = <?= json_encode($chartLabels ?? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']); ?>;
   const dynamicChartData = <?= json_encode($chartValues ?? [0, 0, 0, 0, 0, 0, 0]); ?>;
 </script>
+
 
 <style>
   .form {
