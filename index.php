@@ -1,5 +1,7 @@
 <?php
 include "lib/lib.php";
+include "composables/checkCalls.php";
+
 session_start();
 val();
 

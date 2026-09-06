@@ -5,6 +5,7 @@ function getUsers($db)
     $con = $db->query($sql);
     return $con->fetchAll(PDO::FETCH_ASSOC);
 }
+
 function pagecounter($db)
 {
     $countsql = "SELECT COUNT(*) FROM `admin`";
@@ -20,6 +21,7 @@ function pagecounter($db)
         echo "<a class='pages' href='index.php?page=adminAccounts&pages=$i'>$a</a>";
     }
 }
+
 function datatable($db)
 {
     $page_get = $_GET['pages'] ?? 0;
@@ -33,10 +35,12 @@ function datatable($db)
         foreach ($value as $key => $value2) {
             echo "<td>" . $value2 . "</td>";
         }
-        echo "<td><a class='delete' href='../composables/del.php?id={$value['id']}&page={$_GET['page']}> DELETE </a></td>";
+        echo "<td><a class='delete' href='../composables/del.php?id={$value['id']}&page={adminAccounts}'> DELETE </a></td>";
+        echo "</tr>";
     }
     echo "</table>";
 }
+
 function addAdmin($user, $pass, $role, $db) {
     $countsql = "INSERT INTO admin (id, password, username, role) VALUES (NULL, :password, :user, :role)";
     $con = $db->prepare($countsql);
@@ -46,4 +50,28 @@ function addAdmin($user, $pass, $role, $db) {
     $con->execute();
     exit;
 }
-?>
+
+function adminForm($db) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_admin_submit'])) {
+        $user = $_POST['username'] ?? '';
+        $pass = $_POST['password'] ?? '';
+        $role = $_POST['role'] ?? '';
+
+        if ($role === 'owner') {
+            echo "<p>Error: You cannot set the role to owner.</p>";
+            return;
+        }
+
+        $allowed_roles = ['admin', 'content', 'user'];
+        if (!in_array($role, $allowed_roles)) {
+            echo "<p>Error: Invalid role selected.</p>";
+            return;
+        }
+
+        if (!empty($user) && !empty($pass) && !empty($role)) {
+            addAdmin($user, $pass, $role, $db); 
+        } else {
+            echo "<p>Error: All fields are required.</p>";
+        }
+    }
+}
