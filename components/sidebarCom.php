@@ -53,14 +53,6 @@
           </li>
         <?php } ?>
 
-        <?php if (checkRole($db, $userId, "dbSe")) { ?>
-          <li class="nav-item">
-            <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'db_settings' ? 'active' : '' ?>" href="index.php?page=db_settings">
-              <i class="bi bi-gear"></i> DB Settings
-            </a>
-          </li>
-        <?php } ?>
-
         <?php if (checkRole($db, $userId, "otSe")) { ?>
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'otherSettings' ? 'active' : '' ?>" href="index.php?page=otherSettings">

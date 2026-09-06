@@ -1,13 +1,12 @@
 <?php
 include "../lib/lib.php";
 session_start();
-function delete($db, $id, $page)
+function delete($db, $id)
 {
     $sql = "DELETE FROM usersAuth WHERE id = :id";
     $con = $db->prepare($sql);
     $con->bindValue(":id", $id, PDO::PARAM_INT);
-    $stav = $con->execute();
-    $over = $con->rowCount();
+    $con->execute();
 }
 
 if (isset($_GET["id"])) {
@@ -17,6 +16,6 @@ if (isset($_GET["id"])) {
         header("location:/pages/loginPage.php");
         exit();
     } else {
-        delete($db, $id, $page);
+        delete($db, $id);
     }
 }

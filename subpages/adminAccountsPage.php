@@ -42,7 +42,7 @@ adminForm($db);
             </select>
         </label><br><br>
 
-        <input type="submit" name="add_admin_submit" value="Add Account">
+        <input type="submit" name="adminSubmit" value="Add Account">
     </form>
     </body>
 

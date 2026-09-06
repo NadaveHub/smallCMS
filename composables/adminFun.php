@@ -35,7 +35,7 @@ function datatable($db)
         foreach ($value as $key => $value2) {
             echo "<td>" . $value2 . "</td>";
         }
-        echo "<td><a class='delete' href='../composables/del.php?id={$value['id']}&page={adminAccounts}'> DELETE </a></td>";
+        echo "<td><a class='delete' href='../composables/delAdm.php?id={$value['id']}'> DELETE </a></td>";
         echo "</tr>";
     }
     echo "</table>";
@@ -48,11 +48,10 @@ function addAdmin($user, $pass, $role, $db) {
     $con->bindValue(":password", $pass, PDO::PARAM_STR);
     $con->bindValue(":role", $role, PDO::PARAM_STR);
     $con->execute();
-    exit;
 }
 
 function adminForm($db) {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_admin_submit'])) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminSubmit'])) {
         $user = $_POST['username'] ?? '';
         $pass = $_POST['password'] ?? '';
         $role = $_POST['role'] ?? '';

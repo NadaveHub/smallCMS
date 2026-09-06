@@ -20,7 +20,7 @@ function checkMail($email, $db)
 function checkRole($db, $id, $subpage)
 {
     $sql = "SELECT role FROM admin WHERE id = :id LIMIT 1";
-
+    
     $con = $db->prepare($sql);
     $con->bindValue(':id', $id, PDO::PARAM_STR);
     $con->execute();
