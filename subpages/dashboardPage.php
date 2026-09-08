@@ -7,10 +7,12 @@ if (!isset($_SESSION["dayList"])) {
 
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
   if (isset($_POST['dayList'])) {
-    if ($_POST['dayList'] < 0) {
-      $_SESSION["dayList"] = 0;
+    $inputDays = (int)$_POST['dayList'];
+
+    if ($inputDays < 2) {
+      $_SESSION["dayList"] = 2;
     } else {
-      $_SESSION["dayList"] = $_POST['dayList'];
+      $_SESSION["dayList"] = $inputDays;
     }
   }
 }
@@ -62,7 +64,7 @@ foreach ($chartData as $data) {
 
 <form method="POST" action="" class="d-flex form">
   <label for="dayList">Shown Days</label><br>
-  <input type="text" id="dayList" name="dayList" value="<?php echo ($_SESSION["dayList"]) ?>"><br><br>
+  <input type="number" id="dayList" name="dayList" value="<?php echo ($_SESSION["dayList"]) ?>"><br><br>
 
   <input class="submit" type="submit" value="Go">
 

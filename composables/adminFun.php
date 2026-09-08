@@ -42,6 +42,7 @@ function datatable($db)
 }
 
 function addAdmin($user, $pass, $role, $db) {
+
     $countsql = "INSERT INTO admin (id, password, username, role) VALUES (NULL, :password, :user, :role)";
     $con = $db->prepare($countsql);
     $con->bindValue(":user", $user, PDO::PARAM_STR);
@@ -68,7 +69,8 @@ function adminForm($db) {
         }
 
         if (!empty($user) && !empty($pass) && !empty($role)) {
-            addAdmin($user, $pass, $role, $db); 
+            $passwordH = password_hash($pass, PASSWORD_DEFAULT);
+            addAdmin($user, $passwordH, $role, $db); 
         } else {
             echo "<p>Error: All fields are required.</p>";
         }

@@ -5,7 +5,6 @@ if (isset($_POST['act']) && $_POST['act'] === 'save') {
     $mainColor = $_POST['mainColor'] ?? '#002fff';
     $secColor = $_POST['secColor'] ?? '#ffffff';
     $userID = $_POST['userID'] ?? '';
-    $name = $_POST['name'] ?? '';
     $siteName = $_POST['siteName'] ?? '';
     $defText = $_POST['defText'] ?? '';
     $email = $_POST['email'] ?? '';
@@ -14,7 +13,7 @@ if (isset($_POST['act']) && $_POST['act'] === 'save') {
 
 
 
-    updateSettings($userID, $name, $mainColor, $secColor, $siteName, $defText, $email, $contact, $layout, $db);
+    updateSettings($userID, $mainColor, $secColor, $siteName, $defText, $email, $contact, $layout, $db);
 }
 
 ?>
@@ -23,9 +22,6 @@ if (isset($_POST['act']) && $_POST['act'] === 'save') {
 
 <form method="POST" action="">
     <input type="hidden" name="contentType" value="card">
-
-    <label for="name">Name of the settings:</label><br>
-    <input type="text" id="name" name="name" placeholder="Enter name of settings..." required><br><br>
 
     <label for="siteName">Site Name:</label><br>
     <input type="text" id="siteName" name="siteName" placeholder="Enter name of your site..." required><br><br>

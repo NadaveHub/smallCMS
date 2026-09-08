@@ -1,0 +1,1672 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files and files not matching ignore patterns, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: **/*.php
+- Files matching these patterns are excluded: vendor/**, node_modules/**
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+actions/
+  loginAc.php
+  registerAc.php
+components/
+  card.php
+  footerCom.php
+  headerCom.php
+  sidebarCom.php
+  textPageStr.php
+composables/
+  adminFun.php
+  checkCalls.php
+  contentFun.php
+  del.php
+  delAdm.php
+  loginFun.php
+  logout.php
+  logoutMain.php
+  settingsFun.php
+  unban.php
+lib/
+  check.php
+  db.php
+  lib.php
+pages/
+  loginPage.php
+  mainPage.php
+subpages/
+  accountsPage.php
+  addContentPage.php
+  adminAccountsPage.php
+  bansPage.php
+  dashboardPage.php
+  db_settingsPage.php
+  editContentPage.php
+  otherSettingsPage.php
+  salesPage.php
+index.php
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="actions/loginAc.php">
+
+</file>
+
+<file path="actions/registerAc.php">
+
+</file>
+
+<file path="components/textPageStr.php">
+
+</file>
+
+<file path="composables/logout.php">
+<?php
+session_start();
+$_SESSION = [];
+session_destroy();
+$_SESSION['loged'] = false;
+header("location:/pages/loginPage.php");
+exit;
+</file>
+
+<file path="composables/logoutMain.php">
+<?php
+session_start();
+$_SESSION = [];
+session_destroy();
+$_SESSION['loged'] = false;
+// EDIT TO REAL MAIN PAGE!!!!!!!!!!!!!!!    header("location:/pages/loginPage.php");
+exit;
+</file>
+
+<file path="composables/settingsFun.php">
+<?php
+function updateSettings($userID, $mainColour, $secColour, $siteName, $defText, $email, $contact, $layout, $db)
+{
+    $countsql = "UPDATE settings SET userID = :userID, mainColour = :mainColour, name = :name, secColour = :secColour, siteName = :siteName, defText = :defText, email = :email, contact = :contact WHERE id = 1";
+    $con = $db->prepare($countsql);
+
+    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
+    $con->bindValue(":mainColour", $mainColour, PDO::PARAM_STR);
+    $con->bindValue(":secColour", $secColour, PDO::PARAM_STR);
+    $con->bindValue(":siteName", $siteName, PDO::PARAM_STR);
+    $con->bindValue(":defText", $defText, PDO::PARAM_STR);
+    $con->bindValue(":email", $email, PDO::PARAM_STR);
+    $con->bindValue(":contact", $contact, PDO::PARAM_STR);
+
+    $con->execute();
+    return true;
+}
+</file>
+
+<file path="pages/mainPage.php">
+
+</file>
+
+<file path="subpages/addContentPage.php">
+<?php
+include "composables/contentFun.php";
+$contentType = $_POST['contentType'] ?? 'text';
+?>
+
+<div>
+    <h1><?= strtoupper(htmlspecialchars($contentType)) ?></h1>
+    <br><br>
+
+    <form method="POST" action="">
+        <button type="submit" name="contentType" value="text">TEXT</button><br><br>
+        <button type="submit" name="contentType" value="card">CARD</button><br><br>
+        <button type="submit" name="contentType" value="list">LIST</button>
+    </form>
+</div>
+
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    if ($contentType === "text") {
+        textProc($db);
+    } elseif ($contentType === "card") {
+        cardProc($db);
+    } elseif ($contentType === "list") {
+        listProc($db);
+    } else {
+        echo "jsi kkt";
+    }
+}
+?>
+</file>
+
+<file path="subpages/db_settingsPage.php">
+<?php 
+echo "Admin accounts" . "<br><br>" . "odkaz na ban";
+?>
+</file>
+
+<file path="subpages/editContentPage.php">
+<?php
+include "composables/contentFun.php";
+$activeTab = $_GET['active'] ?? 'all';
+$editData = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action'];
+    $id = (int)($_POST['id'] ?? 0);
+    $type = $_POST['type'] ?? '';
+
+    if ($action === 'delete') {
+        deleteContent($db, $id, $type);
+    } elseif ($action === 'toggle_visibility') {
+        toggleVisibility($db, $id, $type);
+    }
+}
+
+if (isset($_GET['edit_id']) && isset($_GET['edit_type'])) {
+    $editId = (int)$_GET['edit_id'];
+    $editType = $_GET['edit_type'];
+    
+    $table = getTableNameByType($editType);
+    if ($table) {
+        $stmt = $db->prepare("SELECT * FROM $table WHERE id = :id");
+        $stmt->bindValue(':id', $editId, PDO::PARAM_INT);
+        $stmt->execute();
+        $editData = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    $activeTab = $editType; 
+}
+
+$currentLimit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5;
+$nextLimit = $currentLimit + 5;
+
+$feed = getAllBoardContent($db, $currentLimit);
+
+
+
+?>
+
+<div style="display: flex; height: 100%;">
+    <div style="width: 50%; height: 100%;">
+        <h1><?= strtoupper(htmlspecialchars($activeTab)) ?></h1>
+        <br><br>
+
+        <a href="?page=editContent&active=text">
+            <button type="button">TEXT</button>
+        </a><br><br>
+
+        <a href="?page=editContent&active=card">
+            <button type="button">CARD</button>
+        </a><br><br>
+
+        <a href="?page=editContent&active=list">
+            <button type="button">LIST</button>
+        </a><br><br>
+
+        <a href="?page=editContent&active=all">
+            <button type="button">ALL</button>
+        </a><br><br>
+
+        <div style="margin-top: 40px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+            <?php
+            if ($activeTab === 'text') {
+                textProc($db, $editData);
+            } elseif ($activeTab === 'card') {
+                cardProc($db, $editData);
+            } elseif ($activeTab === 'list') {
+                listProc($db, $editData);
+            }
+            ?>
+        </div>
+
+    </div>
+    <div style="width: 50%; height: 100%;">
+        <?php
+
+
+        if (empty($feed)) { ?>
+            <p style="text-align: center; color: #777;">Zatím zde nejsou žádné příspěvky.</p>
+        <?php } else { ?>
+            <?php foreach ($feed as $post) { ?>
+                <div class="post-card">
+                    <div class="post-time">
+                        <?= date('d.m.Y H:i', strtotime($post['time'])) ?>
+                    </div>
+
+                    <h3 class="post-title"><?= htmlspecialchars($post['title']) ?></h3>
+
+                    <div class="post-preview">
+                        <?php
+                        if ($post['type'] !== "list") {
+                            $previewText = strip_tags($post['content']);
+                            echo htmlspecialchars(mb_strimwidth($previewText, 0, 80, "..."));
+                        }
+                        ?>
+                    </div>
+
+                    <div class="post-actions" style="margin-top: 15px; display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+
+                        <a href="?page=editContent&active=<?= $activeTab ?>&edit_id=<?= $post['id'] ?>&edit_type=<?= $post['type'] ?>">
+                            <button type="button">Edit</button>
+                        </a>
+
+                        <form method="POST" style="margin: 0;">
+                            <input type="hidden" name="action" value="toggle_visibility">
+                            <input type="hidden" name="id" value="<?= $post['id'] ?>">
+                            <input type="hidden" name="type" value="<?= $post['type'] ?>">
+                            <button type="submit">
+                                <?= isset($post['is_public']) && $post['is_public'] == 0 ? 'Make Public' : 'Make Private' ?>
+                            </button>
+                        </form>
+
+                        <form method="POST" style="margin: 0;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="id" value="<?= $post['id'] ?>">
+                            <input type="hidden" name="type" value="<?= $post['type'] ?>">
+                            <button type="submit" onclick="return confirm('Opravdu smazat tento příspěvek? (Are you sure?)');" style="color: red;">Delete</button>
+                        </form>
+
+                    </div>
+                </div>
+            <?php } 
+        }
+        if (count($feed) === $currentLimit) { ?>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="?page=editContent&active=<?= $activeTab ?>&limit=<?= $nextLimit ?>">
+                    <button type="button" style="padding: 10px 20px; cursor: pointer;">
+                        Nacist vic...
+                    </button>
+                </a>
+            </div>
+        <?php } ?>
+    </div>
+</div>
+
+<style>
+    .post-card {
+        background: #ffffff;
+        border: 1px solid #eaeaea;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .post-time {
+        font-size: 0.8rem;
+        color: #888;
+        margin-bottom: 10px;
+    }
+
+    .post-title {
+        font-size: 1.3rem;
+        margin: 0 0 10px 0;
+        color: #222;
+    }
+
+    .post-preview {
+        font-size: 0.95rem;
+        color: #444;
+        margin-bottom: 20px;
+    }
+</style>
+</file>
+
+<file path="subpages/otherSettingsPage.php">
+<?php
+include "composables/settingsFun.php";
+
+if (isset($_POST['act']) && $_POST['act'] === 'save') {
+    $mainColor = $_POST['mainColor'] ?? '#002fff';
+    $secColor = $_POST['secColor'] ?? '#ffffff';
+    $userID = $_POST['userID'] ?? '';
+    $siteName = $_POST['siteName'] ?? '';
+    $defText = $_POST['defText'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $contact = $_POST['contact'] ?? '';
+    $layout = $_POST['layout'] ?? '';
+
+
+
+    updateSettings($userID, $mainColor, $secColor, $siteName, $defText, $email, $contact, $layout, $db);
+}
+
+?>
+
+
+
+<form method="POST" action="">
+    <input type="hidden" name="contentType" value="card">
+
+    <label for="siteName">Site Name:</label><br>
+    <input type="text" id="siteName" name="siteName" placeholder="Enter name of your site..." required><br><br>
+
+    <label for="email">email</label><br>
+    <input type="text" id="email" name="email" placeholder="Enter email..." required><br><br>
+
+    <label for="contact">contact</label><br>
+    <input type="text" id="contact" name="contact" placeholder="Enter your contact (phonenumber)" required><br><br>
+
+    <label for="favcolor">Pick a main color:</label>
+    <input type="color" id="mainColor" name="mainColor" value="#002fff"><br><br>
+
+    <label for="favcolor">Pick a secondary color:</label>
+    <input type="color" id="secColor" name="secColor" value="#ffffff"><br><br>
+
+    <button type="submit" name="act" value="save">Save Form</button>
+</form>
+</file>
+
+<file path="components/card.php">
+<div class="card">
+  <img src="img_avatar.png" alt="Avatar" style="width:100%">
+  <div class="container">
+    <h4><b>John Doe</b></h4>
+    <p>Architect & Engineer</p>
+  </div>
+</div>
+
+<style>
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.container {
+  padding: 2px 16px;
+}
+</style>
+</file>
+
+<file path="components/footerCom.php">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"></script>
+<script src="dashboard.js"></script>
+</body>
+
+</html>
+</file>
+
+<file path="components/headerCom.php">
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modular Admin Dashboard</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <link href="dashboard.css" rel="stylesheet" />
+</head>
+
+<body>
+  <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="index.php">Admin Panel</a>
+
+    <ul class="navbar-nav flex-row d-md-none">
+      <li class="nav-item text-nowrap">
+        <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="bi bi-list fs-3"></i>
+        </button>
+      </li>
+    </ul>
+
+    <div id="navbarSearch" class="navbar-search w-100 collapse d-md-block">
+      <input class="form-control w-100 rounded-0 border-0 bg-dark text-white" type="text" placeholder="Search" aria-label="Search" />
+    </div>
+  </header>
+</file>
+
+<file path="composables/delAdm.php">
+<?php
+include "../lib/lib.php";
+session_start();
+function delete($db, $id)
+{
+    $sql = "DELETE FROM admin WHERE id = :id";
+    $con = $db->prepare($sql);
+    $con->bindValue(":id", $id, PDO::PARAM_INT);
+    $stav = $con->execute();
+    $over = $con->rowCount();
+    header("location:/index.php?page=adminAccounts");
+}
+
+if (isset($_GET["id"])) {
+    $id = (int)$_GET["id"];
+
+    if (!isset($_SESSION['loged']) or $_SESSION['loged'] == false) {
+        session_destroy();
+        header("location:/pages/loginPage.php");
+        exit();
+    } elseif ($id !== 1) {
+        delete($db, $id);
+    } else {
+        header("location:/index.php?page=adminAccounts");
+    }
+}
+</file>
+
+<file path="composables/unban.php">
+<?php
+include "../lib/lib.php";
+session_start();
+function delete($db, $id)
+{
+    $sql = "DELETE FROM banLog WHERE id = :id";
+    $con = $db->prepare($sql);
+    $con->bindValue(":id", $id, PDO::PARAM_INT);
+    $stav = $con->execute();
+    $over = $con->rowCount();
+    header("location:/index.php?page=bans");
+    exit;
+}
+
+if (isset($_GET["id"])) {
+    $id = (int)$_GET["id"];
+    if (!isset($_SESSION['loged']) or $_SESSION['loged'] == false) {
+        session_destroy();
+        header("location:/pages/loginPage.php");
+        exit();
+    } else {
+        delete($db, $id);
+    }
+}
+
+?>
+</file>
+
+<file path="lib/db.php">
+<?php
+define('DB_NAME', 'minecraft');
+define('DB_USER', 'mc');
+define('DB_PASSWORD', 'UxaiD*l(BlaPDuR-');
+define('DB_HOST', 'mysql');
+
+global $db;
+$db = new PDO(
+    "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+    DB_USER,
+    DB_PASSWORD,
+);
+</file>
+
+<file path="lib/lib.php">
+<?php
+include "check.php";
+include "db.php";
+?>
+</file>
+
+<file path="subpages/bansPage.php">
+<?php
+require_once "lib/lib.php";
+
+function getUsers($db)
+{
+    $sql = "SELECT FROM banLog ORDER BY id DESC LIMIT 64";
+    $con = $db->query($sql);
+    return $con->fetchAll(PDO::FETCH_ASSOC);
+}
+function pagecounter($db)
+{
+    $countsql = "SELECT COUNT(*) FROM `banLog`";
+    $con = $db->prepare($countsql);
+    $con->execute();
+
+    $data = $con->fetchALL(PDO::FETCH_ASSOC);
+    $countdata = $data[0]["COUNT(*)"];
+    $pages = ceil($countdata / 5);
+
+    for ($i = 0; $i < $pages; $i++) {
+        $a = $i + 1;
+        echo "<a class='pages' href='index.php?page=accounts&pages=$i'>$a</a>";
+    }
+}
+function datatable($db)
+{
+    $page_get = $_GET['pages'] ?? 0;
+    $page = $page_get * 5;
+    $sql = "SELECT * FROM `banLog` LIMIT $page,5";
+    $con = $db->prepare($sql);
+    $con->execute();
+    $data = $con->fetchALL(PDO::FETCH_ASSOC);
+    $count = count($data);
+    if ($count !== 0) {
+        foreach ($data as $key => $value) {
+            echo "<tr>";
+            foreach ($value as $key => $value2) {
+                if ($key == "expire" and $value2 == null ) {
+                    $value2 = "NEVER";
+                }
+                echo "<td>" . $value2 . "</td>";
+            }
+            echo "<td><a class='delete' href='../composables/unban.php?id={$value['id']}&page={$page_get}'> Disable </a></td>";
+        }
+    } else {
+        echo ('<h2>No Accounts Baned</h2>');
+    }
+    echo "</table>";
+}
+
+?>
+<div>
+    <?php
+    pagecounter($db);
+    ?>
+    <table class="datatable">
+        <tr>
+            <td>ID</td>
+            <td>user ID</td>
+            <td>ip</td>
+            <td>EXPIRE</td>
+            <td>TIME</td>
+            <td colspan=2>actions</td>
+
+        </tr>
+        <?php
+        datatable($db);
+
+        ?>
+</div>
+</div>
+</body>
+
+</html>
+
+<style>
+    .datatable {
+        margin-top: 20px;
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid black;
+    }
+
+    .pages {
+        display: inline-block;
+        padding: 8px 12px;
+        margin-left: 5px;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        /*background-color: #007bff;
+    color: #ffffff; */
+        border-radius: 6px;
+    }
+    .noBan {
+        font-size: 80px;
+    }
+</style>
+</file>
+
+<file path="composables/adminFun.php">
+<?php 
+function getUsers($db)
+{
+    $sql = "SELECT FROM admin ORDER BY id DESC LIMIT 64";
+    $con = $db->query($sql);
+    return $con->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function pagecounter($db)
+{
+    $countsql = "SELECT COUNT(*) FROM `admin`";
+    $con = $db->prepare($countsql);
+    $con->execute();
+
+    $data = $con->fetchALL(PDO::FETCH_ASSOC);
+    $countdata = $data[0]["COUNT(*)"];
+    $pages = ceil($countdata / 5);
+
+    for ($i = 0; $i < $pages; $i++) {
+        $a = $i + 1;
+        echo "<a class='pages' href='index.php?page=adminAccounts&pages=$i'>$a</a>";
+    }
+}
+
+function datatable($db)
+{
+    $page_get = $_GET['pages'] ?? 0;
+    $page = $page_get * 5;
+    $sql = "SELECT id, username, role, time FROM `admin` LIMIT $page,5";
+    $con = $db->prepare($sql);
+    $con->execute();
+    $data = $con->fetchALL(PDO::FETCH_ASSOC);
+    foreach ($data as $key => $value) {
+        echo "<tr>";
+        foreach ($value as $key => $value2) {
+            echo "<td>" . $value2 . "</td>";
+        }
+        echo "<td><a class='delete' href='../composables/delAdm.php?id={$value['id']}'> DELETE </a></td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+}
+
+function addAdmin($user, $pass, $role, $db) {
+
+    $countsql = "INSERT INTO admin (id, password, username, role) VALUES (NULL, :password, :user, :role)";
+    $con = $db->prepare($countsql);
+    $con->bindValue(":user", $user, PDO::PARAM_STR);
+    $con->bindValue(":password", $pass, PDO::PARAM_STR);
+    $con->bindValue(":role", $role, PDO::PARAM_STR);
+    $con->execute();
+}
+
+function adminForm($db) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminSubmit'])) {
+        $user = $_POST['username'] ?? '';
+        $pass = $_POST['password'] ?? '';
+        $role = $_POST['role'] ?? '';
+
+        if ($role === 'owner') {
+            echo "<p>Error: You cannot set the role to owner.</p>";
+            return;
+        }
+
+        $allowed_roles = ['admin', 'content', 'user'];
+        if (!in_array($role, $allowed_roles)) {
+            echo "<p>Error: Invalid role selected.</p>";
+            return;
+        }
+
+        if (!empty($user) && !empty($pass) && !empty($role)) {
+            $passwordH = password_hash($pass, PASSWORD_DEFAULT);
+            addAdmin($user, $passwordH, $role, $db); 
+        } else {
+            echo "<p>Error: All fields are required.</p>";
+        }
+    }
+}
+</file>
+
+<file path="composables/del.php">
+<?php
+include "../lib/lib.php";
+session_start();
+function delete($db, $id)
+{
+    $sql = "DELETE FROM usersAuth WHERE id = :id";
+    $con = $db->prepare($sql);
+    $con->bindValue(":id", $id, PDO::PARAM_INT);
+    $con->execute();
+}
+
+if (isset($_GET["id"])) {
+    $id = (int)$_GET["id"];
+    if (!isset($_SESSION['loged']) or $_SESSION['loged'] == false) {
+        session_destroy();
+        header("location:/pages/loginPage.php");
+        exit();
+    } else {
+        delete($db, $id);
+    }
+}
+</file>
+
+<file path="lib/check.php">
+<?php
+function val()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (!isset($_SESSION['loged']) or $_SESSION['loged'] !== true) {
+        unset($_SESSION['loged']);
+        header("location:/pages/loginPage.php");
+        exit();
+    }
+}
+
+function valMail($mail)
+{
+    return filter_var($mail, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+function valPassword($pass)
+{
+    $hasLength = strlen($pass) >= 8;
+
+    $hasNumber = preg_match('/[0-9]/', $pass);
+
+    $hasSpecial = preg_match('/[^a-zA-Z0-9]/', $pass);
+
+    return $hasLength && $hasNumber && $hasSpecial;
+}
+</file>
+
+<file path="pages/loginPage.php">
+<?php
+session_start();
+
+require_once "../composables/loginFun.php";
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINECRAFT WORLDS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <H1>LOGIN</H1>
+
+    <form method="POST" action="">
+        <label for="username">username</label><br>
+        <input type="text" id="username" name="username" required value="<?php echo isset($_GET['username']) ? htmlspecialchars($_GET['username']) : ''; ?>"><br><br>
+
+        <label for="pass">password</label><br>
+        <input type="password" id="password" name="password"><br><br>
+
+        <input class="submit" type="submit" value="LOGIN" name="job">
+    </form>
+    <br>
+    <?php
+    if (isset($_GET["message"])) {
+        echo $_GET['message'];
+    }
+    ?>
+</body>
+
+</html>
+</file>
+
+<file path="subpages/accountsPage.php">
+<?php
+require_once "lib/lib.php";
+
+function getUsers($db)
+{
+    $sql = "SELECT FROM usersAuth ORDER BY id DESC LIMIT 64";
+    $con = $db->query($sql);
+    return $con->fetchAll(PDO::FETCH_ASSOC);
+}
+function pagecounter($db)
+{
+    $countsql = "SELECT COUNT(*) FROM `usersAuth`";
+    $con = $db->prepare($countsql);
+    $con->execute();
+
+    $data = $con->fetchALL(PDO::FETCH_ASSOC);
+    $countdata = $data[0]["COUNT(*)"];
+    $pages = ceil($countdata / 5);
+
+    for ($i = 0; $i < $pages; $i++) {
+        $a = $i + 1;
+        echo "<a class='pages' href='index.php?page=accounts&pages=$i'>$a</a>";
+    }
+}
+function datatable($db)
+{
+    $page_get = $_GET['pages'] ?? 0;
+    $page = $page_get * 5;
+    $sql = "SELECT id, name, email, role, created FROM `usersAuth` LIMIT $page,5";
+    $con = $db->prepare($sql);
+    $con->execute();
+    $data = $con->fetchALL(PDO::FETCH_ASSOC);
+    foreach ($data as $key => $value) {
+        echo "<tr>";
+        foreach ($value as $key => $value2) {
+            echo "<td>" . $value2 . "</td>";
+        }
+        echo "<td><a class='delete' href='../composables/del.php?id={$value['id']}&page={$page_get}'> DELETE </a></td>";
+    }
+    echo "</table>";
+}
+ 
+?>
+<div>
+    <?php
+    pagecounter($db);
+    ?>
+    <table class="datatable">
+        <tr>
+            <td>id</td>
+            <td>name</td>
+            <td>email</td>
+            <td>role</td>
+            <td>created</td>
+            <td colspan=2>actions</td>
+
+        </tr>
+        <?php
+        datatable($db);
+
+        ?>
+</div>
+</div>
+</body>
+
+</html>
+
+<style>
+    .datatable {
+        margin-top: 20px;
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border: 1px solid black;
+    }
+
+    .pages {
+        display: inline-block;
+        padding: 8px 12px;
+        margin-left: 5px;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        border-radius: 6px;
+    }
+</style>
+</file>
+
+<file path="subpages/adminAccountsPage.php">
+<?php
+require_once "lib/lib.php";
+include "composables/adminFun.php";
+
+adminForm($db);
+?>
+<div>
+    <?php
+    pagecounter($db);
+    ?>
+    <br>
+    <table class="datatable">
+        <tr>
+            <td>id</td>
+            <td>username</td>
+            <td>role</td>
+            <td>created</td>
+            <td colspan=2>actions</td>
+
+        </tr>
+        <?php
+        datatable($db);
+        ?>
+</div>
+<br><br>
+<div>
+    <form method="POST" action="">
+        <h3>Add New Admin</h3>
+        <label>Username:
+            <input type="text" name="username" required>
+        </label><br><br>
+
+        <label>Password:
+            <input type="password" name="password" required>
+        </label><br><br>
+
+        <label>Role:
+            <select name="role" required>
+                <option value="admin">Admin</option>
+                <option value="content">Content</option>
+                <option value="user">User</option>
+            </select>
+        </label><br><br>
+
+        <input type="submit" name="adminSubmit" value="Add Account">
+    </form>
+    </body>
+
+    </html>
+
+    <style>
+        .datatable {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid black;
+        }
+
+        .pages {
+            display: inline-block;
+            padding: 8px 12px;
+            margin-left: 5px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 6px;
+        }
+    </style>
+</file>
+
+<file path="subpages/salesPage.php">
+<h1 class=main>You dont have anny sales table ready</h1>
+
+<style>
+    .main {
+        font-size: 64px;
+    }
+</style>
+<?php
+require_once "lib/lib.php";
+include "composables/checkCalls.php";
+
+checkMail("usersAuth", "idk@nevim.idk", $db);
+</file>
+
+<file path="composables/checkCalls.php">
+<?php
+function checkMail($email, $db)
+{
+    if (valMail($email)) {
+        $sql = "SELECT 1 FROM usersAuth WHERE email = :email LIMIT 1";
+
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+        $stmt->execute();
+        $exists = $stmt->fetchColumn();
+
+        if ($exists) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+function checkRole($db, $id, $subpage)
+{
+    $sql = "SELECT role FROM admin WHERE id = :id LIMIT 1";
+    
+    $con = $db->prepare($sql);
+    $con->bindValue(':id', $id, PDO::PARAM_STR);
+    $con->execute();
+    $role = $con->fetchColumn();
+
+    if ($role === "owner") {
+        return true;
+    } else {
+        switch ($subpage) {
+            case "dash":
+                return true;
+
+            case "acco":
+                if ($role === "user" || $role === "admin") {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "admi":
+                if ($role === "admin") {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "bans":
+                if ($role === "user" || $role === "admin") {
+                    return true;
+                } else {
+                    return false;
+                }
+            
+            case "addC":
+                if ($role === "content" || $role === "admin") {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "ediC":
+                if ($role === "content" || $role === "admin") {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            case "dbSe":
+                if ($role === "admin") {
+                    return true;
+                } else {
+                    return false;
+                }
+            case "otSe":
+                if ($role === "admin") {
+                    return true;
+                } else {
+                    return false;
+                }
+        }
+    }
+}
+</file>
+
+<file path="composables/contentFun.php">
+<?php
+function sendText($userID, $content, $name, $db)
+{
+    $countsql = "INSERT INTO textContent (name, userID, content) VALUES (:name, :userID, :content)";
+    $con = $db->prepare($countsql);
+
+    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
+    $con->bindValue(":content", $content, PDO::PARAM_STR);
+    $con->bindValue(":name", $name, PDO::PARAM_STR);
+
+    $con->execute();
+    return true;
+}
+
+function sendCard($userID, $content, $name, $prefix, $db)
+{
+    $countsql = "INSERT INTO cardContent (name, userID, content, prefix) VALUES (:name, :userID, :content, :prefix)";
+    $con = $db->prepare($countsql);
+
+    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
+    $con->bindValue(":content", $content, PDO::PARAM_STR);
+    $con->bindValue(":name", $name, PDO::PARAM_STR);
+    $con->bindValue(":prefix", $prefix, PDO::PARAM_STR);
+
+    $con->execute();
+    return true;
+}
+
+function sendList($userID, $content, $name, $prefix, $highlight, $db)
+{
+    $countsql = "INSERT INTO listContent (name, userID, content, prefix, highlight) VALUES (:name, :userID, :content, :prefix, :highlight)";
+    $con = $db->prepare($countsql);
+
+    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
+    $con->bindValue(":content", $content, PDO::PARAM_STR);
+    $con->bindValue(":name", $name, PDO::PARAM_STR);
+    $con->bindValue(":prefix", $prefix, PDO::PARAM_STR);
+    $con->bindValue(":highlight", $highlight, PDO::PARAM_INT);
+
+    $con->execute();
+    return true;
+}
+
+function textProc($db, $editData = null)
+{
+    if (isset($_POST['action']) && $_POST['action'] === 'saveText') {
+        $name = $_POST['Name'] ?? '';
+        $content = $_POST['content'] ?? '';
+        $edit_id = $_POST['edit_id'] ?? '';
+
+        if ($edit_id) { 
+            $con = $db->prepare("UPDATE textContent SET name = :name, content = :content WHERE id = :id");
+            $con->execute([':name' => $name, ':content' => $content, ':id' => $edit_id]);
+            echo "<h3 style='color: green;'>Text Updated!</h3>";
+        } else { 
+            sendText($_SESSION['activeUser'], $content, $name, $db);
+            echo "<h3 style='color: green;'>Text Saved!</h3>";
+        }
+    }
+
+    $valName = $_POST['Name'] ?? ($editData['name'] ?? '');
+    $valContent = $_POST['content'] ?? ($editData['content'] ?? '');
+    $valId = $editData['id'] ?? '';
+?>
+    <form method="POST" action="">
+        <input type="hidden" name="contentType" value="text">
+        <input type="hidden" name="edit_id" value="<?= $valId ?>">
+        
+        <label for="Name">Name:</label><br>
+        <input type="text" id="Name" name="Name" placeholder="Enter Name..." value="<?= htmlspecialchars($valName) ?>" required><br><br>
+        
+        <label for="content">Enter Content:</label><br>
+        <textarea id="content" name="content" rows="8" cols="50" placeholder="Type your text here..."><?= htmlspecialchars($valContent) ?></textarea>
+        <br><br>
+        
+        <button type="submit" name="action" value="saveText">
+            <?= $valId ? 'Update Text' : 'Submit Text' ?>
+        </button>
+    </form>
+<?php
+}
+
+function cardProc($db, $editData = null)
+{
+    if (isset($_POST['action']) && $_POST['action'] === 'save') {
+        $title = $_POST['title'] ?? '';
+        $prefix = $_POST['prefix'] ?? '';
+        $content = $_POST['content'] ?? '';
+        $edit_id = $_POST['edit_id'] ?? '';
+
+        if ($edit_id) { 
+            $con = $db->prepare("UPDATE cardContent SET name = :name, prefix = :prefix, content = :content WHERE id = :id");
+            $con->execute([':name' => $title, ':prefix' => $prefix, ':content' => $content, ':id' => $edit_id]);
+            echo "<h3 style='color: green;'>Card Updated!</h3>";
+        } else { 
+            sendCard($_SESSION['activeUser'], $content, $title, $prefix, $db);
+            echo "<h3 style='color: green;'>Card Saved!</h3>";
+        }
+    }
+
+    $valTitle = $_POST['title'] ?? ($editData['name'] ?? '');
+    $valPrefix = $_POST['prefix'] ?? ($editData['prefix'] ?? '');
+    $valContent = $_POST['content'] ?? ($editData['content'] ?? '');
+    $valId = $editData['id'] ?? '';
+?>
+    <form method="POST" action="">
+        <input type="hidden" name="contentType" value="card">
+        <input type="hidden" name="edit_id" value="<?= $valId ?>">
+
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" placeholder="Enter title..." value="<?= htmlspecialchars($valTitle) ?>" required><br><br>
+
+        <label for="prefix">Prefix:</label><br>
+        <input type="text" id="prefix" name="prefix" placeholder="Enter prefix..." value="<?= htmlspecialchars($valPrefix) ?>"><br><br>
+
+        <label for="content">Content:</label><br>
+        <textarea id="content" name="content" rows="6" cols="50" placeholder="Enter content here..." required><?= htmlspecialchars($valContent) ?></textarea><br><br>
+
+        <button type="submit" name="action" value="save">
+            <?= $valId ? 'Update Card' : 'Save Form' ?>
+        </button>
+    </form>
+<?php
+}
+
+function listProc($db, $editData = null)
+{
+    $action = $_POST['action'] ?? '';
+    $edit_id = $_POST['edit_id'] ?? ($editData['id'] ?? '');
+
+    if ($editData && empty($_POST)) {
+        $name = $editData['name'] ?? '';
+        $prefix = $editData['prefix'] ?? '';
+        $highlight = $editData['highlight'] ?? 0;
+        $data = json_decode($editData['content'], true) ?: [];
+        $num_rows = count($data) > 0 ? count($data) : 2;
+        $num_cols = count($data[0] ?? []) > 0 ? count($data[0]) : 2;
+    } else {
+        $name = $_POST['list_name'] ?? '';
+        $prefix = $_POST['list_prefix'] ?? '';
+        $highlight = isset($_POST['highlight']) ? 1 : 0;
+        $data = $_POST['list_data'] ?? [];
+        $num_rows = isset($_POST['num_rows']) ? (int)$_POST['num_rows'] : 2;
+        $num_cols = isset($_POST['num_cols']) ? (int)$_POST['num_cols'] : 2;
+    }
+
+    if ($action === 'add_row') {
+        $num_rows++;
+    } elseif ($action === 'add_col') {
+        $num_cols++;
+    } elseif ($action === 'rem_row' && $num_rows > 1) {
+        $num_rows--;
+    } elseif ($action === 'rem_col' && $num_cols > 1) {
+        $num_cols--;
+    } elseif ($action === 'save') {
+        $json_content = json_encode($data);
+        if ($edit_id) {
+            $con = $db->prepare("UPDATE listContent SET name = :name, prefix = :prefix, highlight = :highlight, content = :content WHERE id = :id");
+            $con->execute([':name' => $name, ':prefix' => $prefix, ':highlight' => $highlight, ':content' => $json_content, ':id' => $edit_id]);
+            echo "<h3 style='color: green;'>List Updated!</h3>";
+        } else { 
+            sendList($_SESSION['activeUser'], $json_content, $name, $prefix, $highlight, $db);
+            echo "<h3 style='color: green;'>List successfully saved!</h3>";
+        }
+    }
+?>
+    <form method="POST" action="">
+        <input type="hidden" name="contentType" value="list">
+        <input type="hidden" name="edit_id" value="<?= htmlspecialchars($edit_id) ?>">
+        <input type="hidden" name="num_rows" value="<?= $num_rows ?>">
+        <input type="hidden" name="num_cols" value="<?= $num_cols ?>">
+
+        <label>List Name:</label>
+        <input type="text" name="list_name" value="<?= htmlspecialchars($name) ?>"><br><br>
+
+        <label>List Prefix:</label>
+        <input type="text" name="list_prefix" value="<?= htmlspecialchars($prefix) ?>"><br><br>
+
+        <h4>List Data</h4>
+        <table border="1" cellpadding="5">
+            <?php for ($r = 0; $r < $num_rows; $r++) { ?>
+                <tr>
+                    <?php for ($c = 0; $c < $num_cols; $c++) { ?>
+                        <td>
+                            <input type="text"
+                                name="list_data[<?= $r ?>][<?= $c ?>]"
+                                value="<?= htmlspecialchars($data[$r][$c] ?? '') ?>"
+                                placeholder="R<?= $r + 1 ?> C<?= $c + 1 ?>">
+                        </td>
+                    <?php } ?>
+                </tr>
+            <?php } ?>
+        </table>
+        <br>
+
+        <button type="submit" name="action" value="add_row">Add Row</button>
+        <button type="submit" name="action" value="rem_row">Remove Last Row</button>
+        <br><br>
+        <button type="submit" name="action" value="add_col">Add Column</button>
+        <button type="submit" name="action" value="rem_col">Remove Last Column</button>
+
+        <br><br>
+        <label>
+            <input type="checkbox" name="highlight" value="1" <?= $highlight ? 'checked' : '' ?>> Highlight top row as name of column
+        </label><br><br>
+        
+        <button type="submit" name="action" value="save">
+            <?= $edit_id ? 'Update Final List' : 'Save Final List' ?>
+        </button>
+    </form>
+<?php
+}
+
+function getAllBoardContent($db, $limit = 5)
+{
+    $active = $_GET['active'] ?? "all";
+    $texts = [];
+    $cards = [];
+    $lists = [];
+
+    if ($active === "all" || $active === "text") {
+        $con1 = $db->prepare("SELECT id, name as title, content, time, 'text' as type FROM textContent ORDER BY time DESC LIMIT :limit");
+        $con1->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $con1->execute();
+        $texts = $con1->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    if ($active === "all" || $active === "card") {
+        $con2 = $db->prepare("SELECT id, name as title, content, time, 'card' as type FROM cardContent ORDER BY time DESC LIMIT :limit");
+        $con2->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $con2->execute();
+        $cards = $con2->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    if ($active === "all" || $active === "list") {
+        $con3 = $db->prepare("SELECT id, name as title, content, time, 'list' as type FROM listContent ORDER BY time DESC LIMIT :limit");
+        $con3->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $con3->execute();
+        $lists = $con3->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    $allContent = array_merge($texts, $cards, $lists);
+
+    usort($allContent, function ($a, $b) {
+        return strtotime($b['time']) - strtotime($a['time']);
+    });
+
+    return array_slice($allContent, 0, $limit);
+}
+
+function getTableNameByType($type)
+{
+    if ($type === 'text') return 'textContent';
+    if ($type === 'card') return 'cardContent';
+    if ($type === 'list') return 'listContent';
+    return null;
+}
+
+function deleteContent($db, $id, $type)
+{
+    $table = getTableNameByType($type);
+    if ($table) {
+        $con = $db->prepare("DELETE FROM $table WHERE id = :id");
+        $con->bindValue(':id', $id, PDO::PARAM_INT);
+        $con->execute();
+    }
+}
+
+function toggleVisibility($db, $id, $type)
+{
+    $table = getTableNameByType($type);
+    if ($table) {
+        $con = $db->prepare("UPDATE $table SET is_public = NOT is_public WHERE id = :id");
+        $con->bindValue(':id', $id, PDO::PARAM_INT);
+        $con->execute();
+    }
+}
+</file>
+
+<file path="composables/loginFun.php">
+<?php
+include "../lib/lib.php";
+include "checkCalls.php";
+
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+function check($username, $password, $db)
+{
+    $countsql = "SELECT id, password FROM admin WHERE username = :username LIMIT 1";
+    $con = $db->prepare($countsql);
+    $con->bindValue(":username", $username, PDO::PARAM_STR);
+    $con->execute();
+    $user = $con->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['loged'] = true;
+        $_SESSION['activeUser'] = $user['id'];
+        /*$logSql = "INSERT INTO loginLog (user_id) VALUES (:user_id)";
+        $logCon = $db->prepare($logSql);
+        $logCon->bindValue(":user_id", $user['id'], PDO::PARAM_INT);
+        $logCon->execute();*/
+        header("Location: /index.php");
+        exit();
+    } else {
+        header("Location: /pages/loginPage.php");
+        exit();
+    }
+}
+
+function register($name, $password, $db)
+{
+
+    $countsql = "INSERT INTO admin (id, password, username, role) VALUES (NULL, :password, :name, 'owner')";
+    $con = $db->prepare($countsql);
+    $con->bindValue(":name", $name, PDO::PARAM_STR);
+    $con->bindValue(":password", $password, PDO::PARAM_STR);
+    $con->execute();
+    exit;
+}
+
+
+$name = $pass = $job = $message = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['username'], $_POST['password'], $_POST['job'])) {
+        $name = $_POST["username"];
+        $pass = $_POST["password"];
+        $job = $_POST["job"];
+
+        if (empty($name) or empty($pass)) {
+            header("location:/pages/loginPage.php?username={$_POST['username']}");
+        } else {
+            if (true) {
+
+                switch ($job) {
+                    case "LOGIN":
+                        check($name, $pass, $db);
+                        break;
+                    case "REGISTER":
+                        $pass2 = $_POST['password2'] ?? '';
+                        if ($pass === $pass2) {
+                            $passwordH = password_hash($pass, PASSWORD_DEFAULT);
+                            register($name, $passwordH, $db);
+                        } else {
+                            header("Location: /pages/registerPage.php?error=passwords are not the same");
+                        }
+                        break;
+                }
+            } else {
+            }
+        }
+    }
+}
+</file>
+
+<file path="subpages/dashboardPage.php">
+<?php
+require_once "lib/lib.php";
+
+if (!isset($_SESSION["dayList"])) {
+  $_SESSION["dayList"] = 7;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === "POST") {
+  if (isset($_POST['dayList'])) {
+    $inputDays = (int)$_POST['dayList'];
+
+    if ($inputDays < 2) {
+      $_SESSION["dayList"] = 2;
+    } else {
+      $_SESSION["dayList"] = $inputDays;
+    }
+  }
+}
+
+function getDayUsers($db)
+{
+  $limit = $_SESSION["dayList"];
+  $sql = "SELECT DATE(time) AS log_date, COUNT(DISTINCT id) AS unique_users
+            FROM loginLog
+            GROUP BY DATE(time)
+            ORDER BY log_date DESC
+            LIMIT :limit";
+
+  $stmt = $db->prepare($sql);
+  $stmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+  $stmt->execute();
+
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+$dbResults = getDayUsers($db);
+$loginData = array_column($dbResults, 'unique_users', 'log_date');
+$chartData = [];
+
+for ($i = $_SESSION["dayList"] - 1; $i >= 0; $i--) {
+  $date = date('Y-m-d', strtotime("-$i days"));
+  $chartLabels[] = date('M d', strtotime($date));
+  $chartData[] = [
+    'count' => $loginData[$date] ?? 0
+  ];
+}
+
+$chartValues = [];
+foreach ($chartData as $data) {
+  $chartValues[] = $data['count'];
+}
+?>
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+  <h1 class="h2">Dashboard Data</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+  </div>
+</div>
+
+<form method="POST" action="" class="d-flex form">
+  <label for="dayList">Shown Days</label><br>
+  <input type="number" id="dayList" name="dayList" value="<?php echo ($_SESSION["dayList"]) ?>"><br><br>
+
+  <input class="submit" type="submit" value="Go">
+
+</form>
+
+<script>
+  const dynamicChartLabels = <?= json_encode($chartLabels ?? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']); ?>;
+  const dynamicChartData = <?= json_encode($chartValues ?? [0, 0, 0, 0, 0, 0, 0]); ?>;
+</script>
+
+
+<style>
+  .form {
+    gap: 20px;
+    display: flex;
+  }
+</style>
+</file>
+
+<file path="index.php">
+<?php
+include "lib/lib.php";
+include "composables/checkCalls.php";
+
+session_start();
+val();
+
+$page = $_GET['page'] ?? 'dashboard';
+$page = basename($page);
+
+include 'components/headerCom.php'; 
+?>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <?php include 'components/sidebarCom.php'; ?>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-3">
+      <?php
+      $pagePath = "subpages/{$page}Page.php";
+
+      if (file_exists($pagePath)) {
+        include $pagePath;
+      } else {
+        echo "<h2>404 - Component Not Found</h2><p>Create a file at subpages/{$page}Page.php</p>";
+      }
+      ?>
+    </main>
+
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
+</file>
+
+<file path="components/sidebarCom.php">
+<div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary sticky">
+  <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu">
+    <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto" style="height: calc(100vh - 48px);">
+
+      <ul class="nav flex-column mb-auto">
+        <?php $userId = $_SESSION['activeUser'];
+
+         if (checkRole($db, $userId, "dash")) { ?>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'dashboard' ? 'active' : '' ?>" href="index.php?page=dashboard">
+              <i class="bi bi-house-door"></i> Dashboard
+            </a>
+          </li>
+        <?php } ?>
+
+        <?php if (checkRole($db, $userId, "acco")) { ?>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'accounts' ? 'active' : '' ?>" href="index.php?page=accounts">
+              <i class="bi bi-people"></i> Accounts
+            </a>
+          </li>
+        <?php } ?>
+
+        <?php if (checkRole($db, $userId, "admi")) { ?>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'adminAccounts' ? 'active' : '' ?>" href="index.php?page=adminAccounts">
+              <i class="bi bi-people"></i> Admin Accounts
+            </a>
+          </li>
+        <?php } ?>
+
+        <?php if (checkRole($db, $userId, "bans")) { ?>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'bans' ? 'active' : '' ?>" href="index.php?page=bans">
+              <i class="bi bi-slash-circle"></i> Bans
+            </a>
+          </li>
+        <?php } ?>
+
+        <?php if (checkRole($db, $userId, "addC")) { ?>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'addContent' ? 'active' : '' ?>" href="index.php?page=addContent">
+              <i class="bi bi-file-earmark-text"></i> Add Content
+            </a>
+          </li>
+        <?php } ?>
+
+        <?php if (checkRole($db, $userId, "ediC")) { ?>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'editContent' ? 'active' : '' ?>" href="index.php?page=editContent">
+              <i class="bi bi-file-earmark-text"></i> Edit Content
+            </a>
+          </li>
+        <?php } ?>
+
+        <?php if (checkRole($db, $userId, "otSe")) { ?>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'otherSettings' ? 'active' : '' ?>" href="index.php?page=otherSettings">
+              <i class="bi bi-gear"></i> Other Settings
+            </a>
+          </li>
+        <?php } ?>
+      </ul>
+
+      <hr class="my-3" />
+
+      <ul class="nav flex-column mb-3">
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2 text-warning" href="/composables/logoutMain.php">
+            <i class="bi bi-door-closed"></i> Go to main Page
+          </a>
+        </li>
+      </ul>
+
+      <hr class="my-3" />
+
+      <ul class="nav flex-column mb-3">
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2 text-danger" href="/composables/logout.php">
+            <i class="bi bi-door-closed"></i> Sign out
+          </a>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .sticky {
+    position: sticky;
+    top: 90px;
+  }
+</style>
+</file>
+
+</files>
