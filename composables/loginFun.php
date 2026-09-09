@@ -30,17 +30,6 @@ function check($username, $password, $db)
     }
 }
 
-function register($name, $password, $db)
-{
-
-    $countsql = "INSERT INTO admin (id, password, username, role) VALUES (NULL, :password, :name, 'owner')";
-    $con = $db->prepare($countsql);
-    $con->bindValue(":name", $name, PDO::PARAM_STR);
-    $con->bindValue(":password", $password, PDO::PARAM_STR);
-    $con->execute();
-    exit;
-}
-
 
 $name = $pass = $job = $message = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -53,20 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("location:/pages/loginPage.php?username={$_POST['username']}");
         } else {
             if (true) {
-
-                switch ($job) {
-                    case "LOGIN":
-                        check($name, $pass, $db);
-                        break;
-                    case "REGISTER":
-                        $pass2 = $_POST['password2'] ?? '';
-                        if ($pass === $pass2) {
-                            $passwordH = password_hash($pass, PASSWORD_DEFAULT);
-                            register($name, $passwordH, $db);
-                        } else {
-                            header("Location: /pages/registerPage.php?error=passwords are not the same");
-                        }
-                        break;
+                if ($job ==="LOGIN") {
+                    check($name, $pass, $db);
                 }
             } else {
             }

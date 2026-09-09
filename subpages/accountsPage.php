@@ -33,7 +33,7 @@ function datatable($db)
     foreach ($data as $key => $value) {
         echo "<tr>";
         foreach ($value as $key => $value2) {
-            echo "<td>" . $value2 . "</td>";
+            echo "<td>" . htmlspecialchars($value2 ?? '') . "</td>";
         }
         echo "<td><a class='delete' href='../composables/del.php?id={$value['id']}&page={$page_get}'> DELETE </a></td>";
     }

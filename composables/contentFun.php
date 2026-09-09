@@ -12,29 +12,29 @@ function sendText($userID, $content, $name, $db)
     return true;
 }
 
-function sendCard($userID, $content, $name, $prefix, $db)
+function sendCard($userID, $content, $name, $perex, $db)
 {
-    $countsql = "INSERT INTO cardContent (name, userID, content, prefix) VALUES (:name, :userID, :content, :prefix)";
+    $countsql = "INSERT INTO cardContent (name, userID, content, perex) VALUES (:name, :userID, :content, :perex)";
     $con = $db->prepare($countsql);
 
     $con->bindValue(":userID", $userID, PDO::PARAM_INT);
     $con->bindValue(":content", $content, PDO::PARAM_STR);
     $con->bindValue(":name", $name, PDO::PARAM_STR);
-    $con->bindValue(":prefix", $prefix, PDO::PARAM_STR);
+    $con->bindValue(":perex", $perex, PDO::PARAM_STR);
 
     $con->execute();
     return true;
 }
 
-function sendList($userID, $content, $name, $prefix, $highlight, $db)
+function sendList($userID, $content, $name, $perex, $highlight, $db)
 {
-    $countsql = "INSERT INTO listContent (name, userID, content, prefix, highlight) VALUES (:name, :userID, :content, :prefix, :highlight)";
+    $countsql = "INSERT INTO listContent (name, userID, content, perex, highlight) VALUES (:name, :userID, :content, :perex, :highlight)";
     $con = $db->prepare($countsql);
 
     $con->bindValue(":userID", $userID, PDO::PARAM_INT);
     $con->bindValue(":content", $content, PDO::PARAM_STR);
     $con->bindValue(":name", $name, PDO::PARAM_STR);
-    $con->bindValue(":prefix", $prefix, PDO::PARAM_STR);
+    $con->bindValue(":perex", $perex, PDO::PARAM_STR);
     $con->bindValue(":highlight", $highlight, PDO::PARAM_INT);
 
     $con->execute();
@@ -84,22 +84,22 @@ function cardProc($db, $editData = null)
 {
     if (isset($_POST['action']) && $_POST['action'] === 'save') {
         $title = $_POST['title'] ?? '';
-        $prefix = $_POST['prefix'] ?? '';
+        $perex = $_POST['perex'] ?? '';
         $content = $_POST['content'] ?? '';
         $edit_id = $_POST['edit_id'] ?? '';
 
         if ($edit_id) { 
-            $con = $db->prepare("UPDATE cardContent SET name = :name, prefix = :prefix, content = :content WHERE id = :id");
-            $con->execute([':name' => $title, ':prefix' => $prefix, ':content' => $content, ':id' => $edit_id]);
+            $con = $db->prepare("UPDATE cardContent SET name = :name, perex = :perex, content = :content WHERE id = :id");
+            $con->execute([':name' => $title, ':perex' => $perex, ':content' => $content, ':id' => $edit_id]);
             echo "<h3 style='color: green;'>Card Updated!</h3>";
         } else { 
-            sendCard($_SESSION['activeUser'], $content, $title, $prefix, $db);
+            sendCard($_SESSION['activeUser'], $content, $title, $perex, $db);
             echo "<h3 style='color: green;'>Card Saved!</h3>";
         }
     }
 
     $valTitle = $_POST['title'] ?? ($editData['name'] ?? '');
-    $valPrefix = $_POST['prefix'] ?? ($editData['prefix'] ?? '');
+    $valperex = $_POST['perex'] ?? ($editData['perex'] ?? '');
     $valContent = $_POST['content'] ?? ($editData['content'] ?? '');
     $valId = $editData['id'] ?? '';
 ?>
@@ -110,8 +110,8 @@ function cardProc($db, $editData = null)
         <label for="title">Title:</label><br>
         <input type="text" id="title" name="title" placeholder="Enter title..." value="<?= htmlspecialchars($valTitle) ?>" required><br><br>
 
-        <label for="prefix">Prefix:</label><br>
-        <input type="text" id="prefix" name="prefix" placeholder="Enter prefix..." value="<?= htmlspecialchars($valPrefix) ?>"><br><br>
+        <label for="perex">perex:</label><br>
+        <input type="text" id="perex" name="perex" placeholder="Enter perex..." value="<?= htmlspecialchars($valperex) ?>"><br><br>
 
         <label for="content">Content:</label><br>
         <textarea id="content" name="content" rows="6" cols="50" placeholder="Enter content here..." required><?= htmlspecialchars($valContent) ?></textarea><br><br>
@@ -130,14 +130,14 @@ function listProc($db, $editData = null)
 
     if ($editData && empty($_POST)) {
         $name = $editData['name'] ?? '';
-        $prefix = $editData['prefix'] ?? '';
+        $perex = $editData['perex'] ?? '';
         $highlight = $editData['highlight'] ?? 0;
         $data = json_decode($editData['content'], true) ?: [];
         $num_rows = count($data) > 0 ? count($data) : 2;
         $num_cols = count($data[0] ?? []) > 0 ? count($data[0]) : 2;
     } else {
         $name = $_POST['list_name'] ?? '';
-        $prefix = $_POST['list_prefix'] ?? '';
+        $perex = $_POST['list_perex'] ?? '';
         $highlight = isset($_POST['highlight']) ? 1 : 0;
         $data = $_POST['list_data'] ?? [];
         $num_rows = isset($_POST['num_rows']) ? (int)$_POST['num_rows'] : 2;
@@ -155,11 +155,11 @@ function listProc($db, $editData = null)
     } elseif ($action === 'save') {
         $json_content = json_encode($data);
         if ($edit_id) {
-            $con = $db->prepare("UPDATE listContent SET name = :name, prefix = :prefix, highlight = :highlight, content = :content WHERE id = :id");
-            $con->execute([':name' => $name, ':prefix' => $prefix, ':highlight' => $highlight, ':content' => $json_content, ':id' => $edit_id]);
+            $con = $db->prepare("UPDATE listContent SET name = :name, perex = :perex, highlight = :highlight, content = :content WHERE id = :id");
+            $con->execute([':name' => $name, ':perex' => $perex, ':highlight' => $highlight, ':content' => $json_content, ':id' => $edit_id]);
             echo "<h3 style='color: green;'>List Updated!</h3>";
         } else { 
-            sendList($_SESSION['activeUser'], $json_content, $name, $prefix, $highlight, $db);
+            sendList($_SESSION['activeUser'], $json_content, $name, $perex, $highlight, $db);
             echo "<h3 style='color: green;'>List successfully saved!</h3>";
         }
     }
@@ -173,8 +173,8 @@ function listProc($db, $editData = null)
         <label>List Name:</label>
         <input type="text" name="list_name" value="<?= htmlspecialchars($name) ?>"><br><br>
 
-        <label>List Prefix:</label>
-        <input type="text" name="list_prefix" value="<?= htmlspecialchars($prefix) ?>"><br><br>
+        <label>List perex:</label>
+        <input type="text" name="list_perex" value="<?= htmlspecialchars($perex) ?>"><br><br>
 
         <h4>List Data</h4>
         <table border="1" cellpadding="5">

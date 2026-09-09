@@ -16,13 +16,27 @@ function checkMail($email, $db)
         }
     }
 }
+function checkRoleAdmin($db, $id)
+{
+    $sql = "SELECT role FROM admin WHERE id = :id LIMIT 1";
+    
+    $con = $db->prepare($sql);
+    $con->bindValue(':id', $id, PDO::PARAM_INT);
+    $con->execute();
+    $role = $con->fetchColumn();
+    if ($role === "admin" || $role === "owner") {
+        return true;
+    }else {
+        return false;
+    }
+}
 
 function checkRole($db, $id, $subpage)
 {
     $sql = "SELECT role FROM admin WHERE id = :id LIMIT 1";
     
     $con = $db->prepare($sql);
-    $con->bindValue(':id', $id, PDO::PARAM_STR);
+    $con->bindValue(':id', $id, PDO::PARAM_INT);
     $con->execute();
     $role = $con->fetchColumn();
 

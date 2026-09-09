@@ -1,6 +1,18 @@
 <?php
 include "../lib/lib.php";
+include "../composables/checkCalls.php";
 session_start();
+if (!isset($_SESSION['loged']) || $_SESSION['loged'] !== true) {
+    header("Location: /pages/loginPage.php");
+    exit();
+}
+
+if (!checkRoleAdmin($db, (int)$_SESSION['activeUser'])) {
+    http_response_code(403);
+    die("Unauthorized access.");
+}
+
+
 function delete($db, $id)
 {
     $sql = "DELETE FROM admin WHERE id = :id";

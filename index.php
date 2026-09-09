@@ -8,7 +8,28 @@ val();
 $page = $_GET['page'] ?? 'dashboard';
 $page = basename($page);
 
-include 'components/headerCom.php'; 
+$roleMap = [
+  'dashboard' => 'dash',
+  'accounts' => 'acco',
+  'adminAccounts' => 'admi',
+  'addContent' => 'addC',
+  'editContent' => 'ediC',
+  'otherSettings' => 'otSe'
+];
+$roleCode = $roleMap[$page] ?? null;
+
+if (!$roleCode) {
+    die("<h2>404 - Page Not Found or Not Mapped</h2>");
+}
+
+if ($roleCode && !checkRole($db, $_SESSION['activeUser'], $roleCode)) {
+  session_destroy();
+  $_SESSION['loged'] = false;
+  die("<h2>403 - Unauthorized</h2><p>You do not have permission to view this page.</p>");
+}
+
+
+include 'components/headerCom.php';
 ?>
 
 <div class="container-fluid">
@@ -36,4 +57,5 @@ include 'components/headerCom.php';
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"></script>
 <script src="dashboard.js"></script>
 </body>
+
 </html>

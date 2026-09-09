@@ -29,13 +29,13 @@
           </li>
         <?php } ?>
 
-        <?php if (checkRole($db, $userId, "bans")) { ?>
+        <?php /*if (checkRole($db, $userId, "bans")) { ?>
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'bans' ? 'active' : '' ?>" href="index.php?page=bans">
               <i class="bi bi-slash-circle"></i> Bans
             </a>
           </li>
-        <?php } ?>
+        <?php } */?>
 
         <?php if (checkRole($db, $userId, "addC")) { ?>
           <li class="nav-item">
@@ -60,16 +60,6 @@
             </a>
           </li>
         <?php } ?>
-      </ul>
-
-      <hr class="my-3" />
-
-      <ul class="nav flex-column mb-3">
-        <li class="nav-item">
-          <a class="nav-link d-flex align-items-center gap-2 text-warning" href="/composables/logoutMain.php">
-            <i class="bi bi-door-closed"></i> Go to main Page
-          </a>
-        </li>
       </ul>
 
       <hr class="my-3" />

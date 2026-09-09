@@ -46,11 +46,9 @@ actions/
   loginAc.php
   registerAc.php
 components/
-  card.php
   footerCom.php
   headerCom.php
   sidebarCom.php
-  textPageStr.php
 composables/
   adminFun.php
   checkCalls.php
@@ -68,7 +66,6 @@ lib/
   lib.php
 pages/
   loginPage.php
-  mainPage.php
 subpages/
   accountsPage.php
   addContentPage.php
@@ -93,10 +90,6 @@ This section contains the contents of the repository's files.
 
 </file>
 
-<file path="components/textPageStr.php">
-
-</file>
-
 <file path="composables/logout.php">
 <?php
 session_start();
@@ -105,6 +98,7 @@ session_destroy();
 $_SESSION['loged'] = false;
 header("location:/pages/loginPage.php");
 exit;
+?>
 </file>
 
 <file path="composables/logoutMain.php">
@@ -113,32 +107,7 @@ session_start();
 $_SESSION = [];
 session_destroy();
 $_SESSION['loged'] = false;
-// EDIT TO REAL MAIN PAGE!!!!!!!!!!!!!!!    header("location:/pages/loginPage.php");
 exit;
-</file>
-
-<file path="composables/settingsFun.php">
-<?php
-function updateSettings($userID, $mainColour, $secColour, $siteName, $defText, $email, $contact, $layout, $db)
-{
-    $countsql = "UPDATE settings SET userID = :userID, mainColour = :mainColour, name = :name, secColour = :secColour, siteName = :siteName, defText = :defText, email = :email, contact = :contact WHERE id = 1";
-    $con = $db->prepare($countsql);
-
-    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
-    $con->bindValue(":mainColour", $mainColour, PDO::PARAM_STR);
-    $con->bindValue(":secColour", $secColour, PDO::PARAM_STR);
-    $con->bindValue(":siteName", $siteName, PDO::PARAM_STR);
-    $con->bindValue(":defText", $defText, PDO::PARAM_STR);
-    $con->bindValue(":email", $email, PDO::PARAM_STR);
-    $con->bindValue(":contact", $contact, PDO::PARAM_STR);
-
-    $con->execute();
-    return true;
-}
-</file>
-
-<file path="pages/mainPage.php">
-
 </file>
 
 <file path="subpages/addContentPage.php">
@@ -348,76 +317,6 @@ $feed = getAllBoardContent($db, $currentLimit);
 </style>
 </file>
 
-<file path="subpages/otherSettingsPage.php">
-<?php
-include "composables/settingsFun.php";
-
-if (isset($_POST['act']) && $_POST['act'] === 'save') {
-    $mainColor = $_POST['mainColor'] ?? '#002fff';
-    $secColor = $_POST['secColor'] ?? '#ffffff';
-    $userID = $_POST['userID'] ?? '';
-    $siteName = $_POST['siteName'] ?? '';
-    $defText = $_POST['defText'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $contact = $_POST['contact'] ?? '';
-    $layout = $_POST['layout'] ?? '';
-
-
-
-    updateSettings($userID, $mainColor, $secColor, $siteName, $defText, $email, $contact, $layout, $db);
-}
-
-?>
-
-
-
-<form method="POST" action="">
-    <input type="hidden" name="contentType" value="card">
-
-    <label for="siteName">Site Name:</label><br>
-    <input type="text" id="siteName" name="siteName" placeholder="Enter name of your site..." required><br><br>
-
-    <label for="email">email</label><br>
-    <input type="text" id="email" name="email" placeholder="Enter email..." required><br><br>
-
-    <label for="contact">contact</label><br>
-    <input type="text" id="contact" name="contact" placeholder="Enter your contact (phonenumber)" required><br><br>
-
-    <label for="favcolor">Pick a main color:</label>
-    <input type="color" id="mainColor" name="mainColor" value="#002fff"><br><br>
-
-    <label for="favcolor">Pick a secondary color:</label>
-    <input type="color" id="secColor" name="secColor" value="#ffffff"><br><br>
-
-    <button type="submit" name="act" value="save">Save Form</button>
-</form>
-</file>
-
-<file path="components/card.php">
-<div class="card">
-  <img src="img_avatar.png" alt="Avatar" style="width:100%">
-  <div class="container">
-    <h4><b>John Doe</b></h4>
-    <p>Architect & Engineer</p>
-  </div>
-</div>
-
-<style>
-.card {
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-}
-
-.card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-}
-
-.container {
-  padding: 2px 16px;
-}
-</style>
-</file>
-
 <file path="components/footerCom.php">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"></script>
@@ -463,7 +362,19 @@ if (isset($_POST['act']) && $_POST['act'] === 'save') {
 <file path="composables/delAdm.php">
 <?php
 include "../lib/lib.php";
+include "../composables/checkCalls.php";
 session_start();
+if (!isset($_SESSION['loged']) || $_SESSION['loged'] !== true) {
+    header("Location: /pages/loginPage.php");
+    exit();
+}
+
+if (!checkRoleAdmin($db, (int)$_SESSION['activeUser'])) {
+    http_response_code(403);
+    die("Unauthorized access.");
+}
+
+
 function delete($db, $id)
 {
     $sql = "DELETE FROM admin WHERE id = :id";
@@ -486,6 +397,26 @@ if (isset($_GET["id"])) {
     } else {
         header("location:/index.php?page=adminAccounts");
     }
+}
+</file>
+
+<file path="composables/settingsFun.php">
+<?php
+function updateSettings($userID, $mainColour, $secColour, $siteName, $defText, $email, $contact, $layout, $db)
+{
+    $countsql = "UPDATE settings SET userID = :userID, mainColour = :mainColour, name = :name, secColour = :secColour, siteName = :siteName, defText = :defText, email = :email, contact = :contact WHERE id = 1";
+    $con = $db->prepare($countsql);
+
+    $con->bindValue(":userID", $userID, PDO::PARAM_INT);
+    $con->bindValue(":mainColour", $mainColour, PDO::PARAM_STR);
+    $con->bindValue(":secColour", $secColour, PDO::PARAM_STR);
+    $con->bindValue(":siteName", $siteName, PDO::PARAM_STR);
+    $con->bindValue(":defText", $defText, PDO::PARAM_STR);
+    $con->bindValue(":email", $email, PDO::PARAM_STR);
+    $con->bindValue(":contact", $contact, PDO::PARAM_STR);
+
+    $con->execute();
+    return true;
 }
 </file>
 
@@ -581,7 +512,7 @@ function datatable($db)
                 if ($key == "expire" and $value2 == null ) {
                     $value2 = "NEVER";
                 }
-                echo "<td>" . $value2 . "</td>";
+                echo "<td>" . htmlspecialchars($value2 ?? '') . "</td>";
             }
             echo "<td><a class='delete' href='../composables/unban.php?id={$value['id']}&page={$page_get}'> Disable </a></td>";
         }
@@ -643,85 +574,55 @@ function datatable($db)
 </style>
 </file>
 
-<file path="composables/adminFun.php">
-<?php 
-function getUsers($db)
-{
-    $sql = "SELECT FROM admin ORDER BY id DESC LIMIT 64";
-    $con = $db->query($sql);
-    return $con->fetchAll(PDO::FETCH_ASSOC);
+<file path="subpages/otherSettingsPage.php">
+<?php
+include "composables/settingsFun.php";
+
+if (isset($_POST['act']) && $_POST['act'] === 'save') {
+    $mainColor = $_POST['mainColor'] ?? '#002fff';
+    $secColor  = $_POST['secColor'] ?? '#ffffff';
+    $userID    = $_POST['userID'] ?? '';
+    $siteName  = $_POST['siteName'] ?? '';
+    $defText   = $_POST['defText'] ?? '';
+    $email     = $_POST['email'] ?? '';
+    $contact   = $_POST['contact'] ?? '';
+    $layout    = $_POST['layout'] ?? '';
+
+    updateSettings($userID, $mainColor, $secColor, $siteName, $defText, $email, $contact, $layout, $db);
 }
 
-function pagecounter($db)
-{
-    $countsql = "SELECT COUNT(*) FROM `admin`";
-    $con = $db->prepare($countsql);
-    $con->execute();
+$con = $db->prepare("SELECT * FROM settings WHERE id = 1");
+$con->execute();
+$currentSettings = $con->fetch(PDO::FETCH_ASSOC);
 
-    $data = $con->fetchALL(PDO::FETCH_ASSOC);
-    $countdata = $data[0]["COUNT(*)"];
-    $pages = ceil($countdata / 5);
+$valSiteName  = $currentSettings['siteName'] ?? '';
+$valEmail     = $currentSettings['email'] ?? '';
+$valContact   = $currentSettings['contact'] ?? '';
+$valMainColor = $currentSettings['mainColour'] ?? '#002fff';
+$valSecColor  = $currentSettings['secColour'] ?? '#ffffff';
+?>
 
-    for ($i = 0; $i < $pages; $i++) {
-        $a = $i + 1;
-        echo "<a class='pages' href='index.php?page=adminAccounts&pages=$i'>$a</a>";
-    }
-}
+<form method="POST" action="">
+    <input type="hidden" name="contentType" value="card">
+    <input type="hidden" name="userID" value="<?= htmlspecialchars($_SESSION['activeUser'] ?? '') ?>">
 
-function datatable($db)
-{
-    $page_get = $_GET['pages'] ?? 0;
-    $page = $page_get * 5;
-    $sql = "SELECT id, username, role, time FROM `admin` LIMIT $page,5";
-    $con = $db->prepare($sql);
-    $con->execute();
-    $data = $con->fetchALL(PDO::FETCH_ASSOC);
-    foreach ($data as $key => $value) {
-        echo "<tr>";
-        foreach ($value as $key => $value2) {
-            echo "<td>" . $value2 . "</td>";
-        }
-        echo "<td><a class='delete' href='../composables/delAdm.php?id={$value['id']}'> DELETE </a></td>";
-        echo "</tr>";
-    }
-    echo "</table>";
-}
+    <label for="siteName">Site Name:</label><br>
+    <input type="text" id="siteName" name="siteName" placeholder="Enter name of your site..." value="<?= htmlspecialchars($valSiteName) ?>" required><br><br>
 
-function addAdmin($user, $pass, $role, $db) {
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" placeholder="Enter email..." value="<?= htmlspecialchars($valEmail) ?>" required><br><br>
 
-    $countsql = "INSERT INTO admin (id, password, username, role) VALUES (NULL, :password, :user, :role)";
-    $con = $db->prepare($countsql);
-    $con->bindValue(":user", $user, PDO::PARAM_STR);
-    $con->bindValue(":password", $pass, PDO::PARAM_STR);
-    $con->bindValue(":role", $role, PDO::PARAM_STR);
-    $con->execute();
-}
+    <label for="contact">Contact:</label><br>
+    <input type="text" id="contact" name="contact" placeholder="Enter your contact (phonenumber)" value="<?= htmlspecialchars($valContact) ?>" required><br><br>
 
-function adminForm($db) {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminSubmit'])) {
-        $user = $_POST['username'] ?? '';
-        $pass = $_POST['password'] ?? '';
-        $role = $_POST['role'] ?? '';
+    <label for="mainColor">Pick a main color:</label>
+    <input type="color" id="mainColor" name="mainColor" value="<?= htmlspecialchars($valMainColor) ?>"><br><br>
 
-        if ($role === 'owner') {
-            echo "<p>Error: You cannot set the role to owner.</p>";
-            return;
-        }
+    <label for="secColor">Pick a secondary color:</label>
+    <input type="color" id="secColor" name="secColor" value="<?= htmlspecialchars($valSecColor) ?>"><br><br>
 
-        $allowed_roles = ['admin', 'content', 'user'];
-        if (!in_array($role, $allowed_roles)) {
-            echo "<p>Error: Invalid role selected.</p>";
-            return;
-        }
-
-        if (!empty($user) && !empty($pass) && !empty($role)) {
-            $passwordH = password_hash($pass, PASSWORD_DEFAULT);
-            addAdmin($user, $passwordH, $role, $db); 
-        } else {
-            echo "<p>Error: All fields are required.</p>";
-        }
-    }
-}
+    <button type="submit" name="act" value="save">Save settings</button>
+</form>
 </file>
 
 <file path="composables/del.php">
@@ -744,6 +645,7 @@ if (isset($_GET["id"])) {
         exit();
     } else {
         delete($db, $id);
+        header("location:/index.php?page=accounts");
     }
 }
 </file>
@@ -811,7 +713,7 @@ require_once "../composables/loginFun.php";
     <br>
     <?php
     if (isset($_GET["message"])) {
-        echo $_GET['message'];
+        echo htmlspecialchars($_GET['message']);
     }
     ?>
 </body>
@@ -855,7 +757,7 @@ function datatable($db)
     foreach ($data as $key => $value) {
         echo "<tr>";
         foreach ($value as $key => $value2) {
-            echo "<td>" . $value2 . "</td>";
+            echo "<td>" . htmlspecialchars($value2 ?? '') . "</td>";
         }
         echo "<td><a class='delete' href='../composables/del.php?id={$value['id']}&page={$page_get}'> DELETE </a></td>";
     }
@@ -997,6 +899,87 @@ include "composables/checkCalls.php";
 checkMail("usersAuth", "idk@nevim.idk", $db);
 </file>
 
+<file path="composables/adminFun.php">
+<?php 
+function getUsers($db)
+{
+    $sql = "SELECT FROM admin ORDER BY id DESC LIMIT 64";
+    $con = $db->query($sql);
+    return $con->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function pagecounter($db)
+{
+    $countsql = "SELECT COUNT(*) FROM `admin`";
+    $con = $db->prepare($countsql);
+    $con->execute();
+
+    $data = $con->fetchALL(PDO::FETCH_ASSOC);
+    $countdata = $data[0]["COUNT(*)"];
+    $pages = ceil($countdata / 5);
+
+    for ($i = 0; $i < $pages; $i++) {
+        $a = $i + 1;
+        echo "<a class='pages' href='index.php?page=adminAccounts&pages=$i'>$a</a>";
+    }
+}
+
+function datatable($db)
+{
+    $page_get = $_GET['pages'] ?? 0;
+    $page = $page_get * 5;
+    $sql = "SELECT id, username, role, time FROM `admin` LIMIT $page,5";
+    $con = $db->prepare($sql);
+    $con->execute();
+    $data = $con->fetchALL(PDO::FETCH_ASSOC);
+    foreach ($data as $key => $value) {
+        echo "<tr>";
+        foreach ($value as $key => $value2) {
+            echo "<td>" . htmlspecialchars($value2 ?? '') . "</td>";
+        }
+        echo "<td><a class='delete' href='../composables/delAdm.php?id={$value['id']}'> DELETE </a></td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+}
+
+function addAdmin($user, $pass, $role, $db) {
+
+    $countsql = "INSERT INTO admin (id, password, username, role) VALUES (NULL, :password, :user, :role)";
+    $con = $db->prepare($countsql);
+    $con->bindValue(":user", $user, PDO::PARAM_STR);
+    $con->bindValue(":password", $pass, PDO::PARAM_STR);
+    $con->bindValue(":role", $role, PDO::PARAM_STR);
+    $con->execute();
+}
+
+function adminForm($db) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adminSubmit'])) {
+        $user = $_POST['username'] ?? '';
+        $pass = $_POST['password'] ?? '';
+        $role = $_POST['role'] ?? '';
+
+        if ($role === 'owner') {
+            echo htmlspecialchars("<p>Error: You cannot set the role to owner.</p>");
+            return;
+        }
+
+        $allowed_roles = ['admin', 'content', 'user'];
+        if (!in_array($role, $allowed_roles)) {
+            echo htmlspecialchars("<p>Error: Invalid role selected.</p>");
+            return;
+        }
+
+        if (!empty($user) && !empty($pass) && !empty($role)) {
+            $passwordH = password_hash($pass, PASSWORD_DEFAULT);
+            addAdmin($user, $passwordH, $role, $db); 
+        } else {
+            echo htmlspecialchars("<p>Error: All fields are required.</p>");
+        }
+    }
+}
+</file>
+
 <file path="composables/checkCalls.php">
 <?php
 function checkMail($email, $db)
@@ -1016,13 +999,27 @@ function checkMail($email, $db)
         }
     }
 }
+function checkRoleAdmin($db, $id)
+{
+    $sql = "SELECT role FROM admin WHERE id = :id LIMIT 1";
+    
+    $con = $db->prepare($sql);
+    $con->bindValue(':id', $id, PDO::PARAM_INT);
+    $con->execute();
+    $role = $con->fetchColumn();
+    if ($role === "admin" || $role === "owner") {
+        return true;
+    }else {
+        return false;
+    }
+}
 
 function checkRole($db, $id, $subpage)
 {
     $sql = "SELECT role FROM admin WHERE id = :id LIMIT 1";
     
     $con = $db->prepare($sql);
-    $con->bindValue(':id', $id, PDO::PARAM_STR);
+    $con->bindValue(':id', $id, PDO::PARAM_INT);
     $con->execute();
     $role = $con->fetchColumn();
 
@@ -1100,29 +1097,29 @@ function sendText($userID, $content, $name, $db)
     return true;
 }
 
-function sendCard($userID, $content, $name, $prefix, $db)
+function sendCard($userID, $content, $name, $perex, $db)
 {
-    $countsql = "INSERT INTO cardContent (name, userID, content, prefix) VALUES (:name, :userID, :content, :prefix)";
+    $countsql = "INSERT INTO cardContent (name, userID, content, perex) VALUES (:name, :userID, :content, :perex)";
     $con = $db->prepare($countsql);
 
     $con->bindValue(":userID", $userID, PDO::PARAM_INT);
     $con->bindValue(":content", $content, PDO::PARAM_STR);
     $con->bindValue(":name", $name, PDO::PARAM_STR);
-    $con->bindValue(":prefix", $prefix, PDO::PARAM_STR);
+    $con->bindValue(":perex", $perex, PDO::PARAM_STR);
 
     $con->execute();
     return true;
 }
 
-function sendList($userID, $content, $name, $prefix, $highlight, $db)
+function sendList($userID, $content, $name, $perex, $highlight, $db)
 {
-    $countsql = "INSERT INTO listContent (name, userID, content, prefix, highlight) VALUES (:name, :userID, :content, :prefix, :highlight)";
+    $countsql = "INSERT INTO listContent (name, userID, content, perex, highlight) VALUES (:name, :userID, :content, :perex, :highlight)";
     $con = $db->prepare($countsql);
 
     $con->bindValue(":userID", $userID, PDO::PARAM_INT);
     $con->bindValue(":content", $content, PDO::PARAM_STR);
     $con->bindValue(":name", $name, PDO::PARAM_STR);
-    $con->bindValue(":prefix", $prefix, PDO::PARAM_STR);
+    $con->bindValue(":perex", $perex, PDO::PARAM_STR);
     $con->bindValue(":highlight", $highlight, PDO::PARAM_INT);
 
     $con->execute();
@@ -1172,22 +1169,22 @@ function cardProc($db, $editData = null)
 {
     if (isset($_POST['action']) && $_POST['action'] === 'save') {
         $title = $_POST['title'] ?? '';
-        $prefix = $_POST['prefix'] ?? '';
+        $perex = $_POST['perex'] ?? '';
         $content = $_POST['content'] ?? '';
         $edit_id = $_POST['edit_id'] ?? '';
 
         if ($edit_id) { 
-            $con = $db->prepare("UPDATE cardContent SET name = :name, prefix = :prefix, content = :content WHERE id = :id");
-            $con->execute([':name' => $title, ':prefix' => $prefix, ':content' => $content, ':id' => $edit_id]);
+            $con = $db->prepare("UPDATE cardContent SET name = :name, perex = :perex, content = :content WHERE id = :id");
+            $con->execute([':name' => $title, ':perex' => $perex, ':content' => $content, ':id' => $edit_id]);
             echo "<h3 style='color: green;'>Card Updated!</h3>";
         } else { 
-            sendCard($_SESSION['activeUser'], $content, $title, $prefix, $db);
+            sendCard($_SESSION['activeUser'], $content, $title, $perex, $db);
             echo "<h3 style='color: green;'>Card Saved!</h3>";
         }
     }
 
     $valTitle = $_POST['title'] ?? ($editData['name'] ?? '');
-    $valPrefix = $_POST['prefix'] ?? ($editData['prefix'] ?? '');
+    $valperex = $_POST['perex'] ?? ($editData['perex'] ?? '');
     $valContent = $_POST['content'] ?? ($editData['content'] ?? '');
     $valId = $editData['id'] ?? '';
 ?>
@@ -1198,8 +1195,8 @@ function cardProc($db, $editData = null)
         <label for="title">Title:</label><br>
         <input type="text" id="title" name="title" placeholder="Enter title..." value="<?= htmlspecialchars($valTitle) ?>" required><br><br>
 
-        <label for="prefix">Prefix:</label><br>
-        <input type="text" id="prefix" name="prefix" placeholder="Enter prefix..." value="<?= htmlspecialchars($valPrefix) ?>"><br><br>
+        <label for="perex">perex:</label><br>
+        <input type="text" id="perex" name="perex" placeholder="Enter perex..." value="<?= htmlspecialchars($valperex) ?>"><br><br>
 
         <label for="content">Content:</label><br>
         <textarea id="content" name="content" rows="6" cols="50" placeholder="Enter content here..." required><?= htmlspecialchars($valContent) ?></textarea><br><br>
@@ -1218,14 +1215,14 @@ function listProc($db, $editData = null)
 
     if ($editData && empty($_POST)) {
         $name = $editData['name'] ?? '';
-        $prefix = $editData['prefix'] ?? '';
+        $perex = $editData['perex'] ?? '';
         $highlight = $editData['highlight'] ?? 0;
         $data = json_decode($editData['content'], true) ?: [];
         $num_rows = count($data) > 0 ? count($data) : 2;
         $num_cols = count($data[0] ?? []) > 0 ? count($data[0]) : 2;
     } else {
         $name = $_POST['list_name'] ?? '';
-        $prefix = $_POST['list_prefix'] ?? '';
+        $perex = $_POST['list_perex'] ?? '';
         $highlight = isset($_POST['highlight']) ? 1 : 0;
         $data = $_POST['list_data'] ?? [];
         $num_rows = isset($_POST['num_rows']) ? (int)$_POST['num_rows'] : 2;
@@ -1243,11 +1240,11 @@ function listProc($db, $editData = null)
     } elseif ($action === 'save') {
         $json_content = json_encode($data);
         if ($edit_id) {
-            $con = $db->prepare("UPDATE listContent SET name = :name, prefix = :prefix, highlight = :highlight, content = :content WHERE id = :id");
-            $con->execute([':name' => $name, ':prefix' => $prefix, ':highlight' => $highlight, ':content' => $json_content, ':id' => $edit_id]);
+            $con = $db->prepare("UPDATE listContent SET name = :name, perex = :perex, highlight = :highlight, content = :content WHERE id = :id");
+            $con->execute([':name' => $name, ':perex' => $perex, ':highlight' => $highlight, ':content' => $json_content, ':id' => $edit_id]);
             echo "<h3 style='color: green;'>List Updated!</h3>";
         } else { 
-            sendList($_SESSION['activeUser'], $json_content, $name, $prefix, $highlight, $db);
+            sendList($_SESSION['activeUser'], $json_content, $name, $perex, $highlight, $db);
             echo "<h3 style='color: green;'>List successfully saved!</h3>";
         }
     }
@@ -1261,8 +1258,8 @@ function listProc($db, $editData = null)
         <label>List Name:</label>
         <input type="text" name="list_name" value="<?= htmlspecialchars($name) ?>"><br><br>
 
-        <label>List Prefix:</label>
-        <input type="text" name="list_prefix" value="<?= htmlspecialchars($prefix) ?>"><br><br>
+        <label>List perex:</label>
+        <input type="text" name="list_perex" value="<?= htmlspecialchars($perex) ?>"><br><br>
 
         <h4>List Data</h4>
         <table border="1" cellpadding="5">
@@ -1398,17 +1395,6 @@ function check($username, $password, $db)
     }
 }
 
-function register($name, $password, $db)
-{
-
-    $countsql = "INSERT INTO admin (id, password, username, role) VALUES (NULL, :password, :name, 'owner')";
-    $con = $db->prepare($countsql);
-    $con->bindValue(":name", $name, PDO::PARAM_STR);
-    $con->bindValue(":password", $password, PDO::PARAM_STR);
-    $con->execute();
-    exit;
-}
-
 
 $name = $pass = $job = $message = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -1421,20 +1407,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("location:/pages/loginPage.php?username={$_POST['username']}");
         } else {
             if (true) {
-
-                switch ($job) {
-                    case "LOGIN":
-                        check($name, $pass, $db);
-                        break;
-                    case "REGISTER":
-                        $pass2 = $_POST['password2'] ?? '';
-                        if ($pass === $pass2) {
-                            $passwordH = password_hash($pass, PASSWORD_DEFAULT);
-                            register($name, $passwordH, $db);
-                        } else {
-                            header("Location: /pages/registerPage.php?error=passwords are not the same");
-                        }
-                        break;
+                if ($job ==="LOGIN") {
+                    check($name, $pass, $db);
                 }
             } else {
             }
@@ -1530,48 +1504,6 @@ foreach ($chartData as $data) {
 </style>
 </file>
 
-<file path="index.php">
-<?php
-include "lib/lib.php";
-include "composables/checkCalls.php";
-
-session_start();
-val();
-
-$page = $_GET['page'] ?? 'dashboard';
-$page = basename($page);
-
-include 'components/headerCom.php'; 
-?>
-
-<div class="container-fluid">
-  <div class="row">
-
-    <?php include 'components/sidebarCom.php'; ?>
-
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-3">
-      <?php
-      $pagePath = "subpages/{$page}Page.php";
-
-      if (file_exists($pagePath)) {
-        include $pagePath;
-      } else {
-        echo "<h2>404 - Component Not Found</h2><p>Create a file at subpages/{$page}Page.php</p>";
-      }
-      ?>
-    </main>
-
-  </div>
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"></script>
-<script src="dashboard.js"></script>
-</body>
-</html>
-</file>
-
 <file path="components/sidebarCom.php">
 <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary sticky">
   <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu">
@@ -1604,13 +1536,13 @@ include 'components/headerCom.php';
           </li>
         <?php } ?>
 
-        <?php if (checkRole($db, $userId, "bans")) { ?>
+        <?php /*if (checkRole($db, $userId, "bans")) { ?>
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'bans' ? 'active' : '' ?>" href="index.php?page=bans">
               <i class="bi bi-slash-circle"></i> Bans
             </a>
           </li>
-        <?php } ?>
+        <?php } */?>
 
         <?php if (checkRole($db, $userId, "addC")) { ?>
           <li class="nav-item">
@@ -1667,6 +1599,67 @@ include 'components/headerCom.php';
     top: 90px;
   }
 </style>
+</file>
+
+<file path="index.php">
+<?php
+include "lib/lib.php";
+include "composables/checkCalls.php";
+
+session_start();
+val();
+
+$page = $_GET['page'] ?? 'dashboard';
+$page = basename($page);
+
+$roleMap = [
+  'dashboard' => 'dash',
+  'accounts' => 'acco',
+  'adminAccounts' => 'admi',
+  'bans' => 'bans',
+  'addContent' => 'addC',
+  'editContent' => 'ediC',
+  'otherSettings' => 'otSe'
+];
+$roleCode = $roleMap[$page] ?? null;
+
+if ($roleCode && !checkRole($db, $_SESSION['activeUser'], $roleCode)) {
+  session_destroy();
+  $_SESSION['loged'] = false;
+  die("<h2>403 - Unauthorized</h2><p>You do not have permission to view this page.</p>");
+}
+
+
+include 'components/headerCom.php';
+?>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <?php include 'components/sidebarCom.php'; ?>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-3">
+      <?php
+      $pagePath = "subpages/{$page}Page.php";
+
+      if (file_exists($pagePath)) {
+        include $pagePath;
+      } else {
+        echo "<h2>404 - Component Not Found</h2><p>Create a file at subpages/{$page}Page.php</p>";
+      }
+      ?>
+    </main>
+
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.2/dist/chart.umd.js"></script>
+<script src="dashboard.js"></script>
+</body>
+
+</html>
 </file>
 
 </files>

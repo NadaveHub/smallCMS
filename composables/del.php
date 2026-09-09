@@ -17,5 +17,6 @@ if (isset($_GET["id"])) {
         exit();
     } else {
         delete($db, $id);
+        header("location:/index.php?page=accounts");
     }
 }

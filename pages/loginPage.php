@@ -29,7 +29,7 @@ require_once "../composables/loginFun.php";
     <br>
     <?php
     if (isset($_GET["message"])) {
-        echo $_GET['message'];
+        echo htmlspecialchars($_GET['message']);
     }
     ?>
 </body>

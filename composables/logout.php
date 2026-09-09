@@ -5,3 +5,4 @@ session_destroy();
 $_SESSION['loged'] = false;
 header("location:/pages/loginPage.php");
 exit;
+?>

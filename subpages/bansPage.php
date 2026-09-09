@@ -38,7 +38,7 @@ function datatable($db)
                 if ($key == "expire" and $value2 == null ) {
                     $value2 = "NEVER";
                 }
-                echo "<td>" . $value2 . "</td>";
+                echo "<td>" . htmlspecialchars($value2 ?? '') . "</td>";
             }
             echo "<td><a class='delete' href='../composables/unban.php?id={$value['id']}&page={$page_get}'> Disable </a></td>";
         }

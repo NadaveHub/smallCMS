@@ -33,7 +33,7 @@ function datatable($db)
     foreach ($data as $key => $value) {
         echo "<tr>";
         foreach ($value as $key => $value2) {
-            echo "<td>" . $value2 . "</td>";
+            echo "<td>" . htmlspecialchars($value2 ?? '') . "</td>";
         }
         echo "<td><a class='delete' href='../composables/delAdm.php?id={$value['id']}'> DELETE </a></td>";
         echo "</tr>";
@@ -58,13 +58,13 @@ function adminForm($db) {
         $role = $_POST['role'] ?? '';
 
         if ($role === 'owner') {
-            echo "<p>Error: You cannot set the role to owner.</p>";
+            echo htmlspecialchars("<p>Error: You cannot set the role to owner.</p>");
             return;
         }
 
         $allowed_roles = ['admin', 'content', 'user'];
         if (!in_array($role, $allowed_roles)) {
-            echo "<p>Error: Invalid role selected.</p>";
+            echo htmlspecialchars("<p>Error: Invalid role selected.</p>");
             return;
         }
 
@@ -72,7 +72,7 @@ function adminForm($db) {
             $passwordH = password_hash($pass, PASSWORD_DEFAULT);
             addAdmin($user, $passwordH, $role, $db); 
         } else {
-            echo "<p>Error: All fields are required.</p>";
+            echo htmlspecialchars("<p>Error: All fields are required.</p>");
         }
     }
 }
