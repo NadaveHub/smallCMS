@@ -61,39 +61,17 @@ function checkRole($db, $id, $subpage)
                     return false;
                 }
 
-            case "bans":
-                if ($role === "user" || $role === "admin") {
-                    return true;
-                } else {
-                    return false;
-                }
-            
-            case "addC":
+
+            case "addC" || "ediC":
                 if ($role === "content" || $role === "admin") {
                     return true;
                 } else {
                     return false;
                 }
 
-            case "ediC":
-                if ($role === "content" || $role === "admin") {
-                    return true;
-                } else {
-                    return false;
-                }
-
-            case "dbSe":
-                if ($role === "admin") {
-                    return true;
-                } else {
-                    return false;
-                }
             case "otSe":
-                if ($role === "admin") {
-                    return true;
-                } else {
-                    return false;
-                }
+                return false;
+                
         }
     }
 }

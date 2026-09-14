@@ -1,6 +1,7 @@
 <?php
 require_once "lib/lib.php";
 
+
 if (!isset($_SESSION["dayList"])) {
   $_SESSION["dayList"] = 7;
 }

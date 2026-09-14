@@ -1,7 +1,8 @@
 <?php
 function updateSettings($userID, $mainColour, $secColour, $siteName, $defText, $email, $contact, $layout, $db)
 {
-    $countsql = "UPDATE settings SET userID = :userID, mainColour = :mainColour, name = :name, secColour = :secColour, siteName = :siteName, defText = :defText, email = :email, contact = :contact WHERE id = 1";
+    $countsql = "UPDATE settings SET userID = :userID, mainColour = :mainColour, secColour = :secColour, siteName = :siteName, defText = :defText, email = :email, contact = :contact WHERE id = 1";
+                 
     $con = $db->prepare($countsql);
 
     $con->bindValue(":userID", $userID, PDO::PARAM_INT);
@@ -14,4 +15,12 @@ function updateSettings($userID, $mainColour, $secColour, $siteName, $defText, $
 
     $con->execute();
     return true;
+}
+
+function checkHashtag($string) {
+    if (str_starts_with($string, '#')) {
+        return true;
+    } else {
+        return false;
+    }
 }

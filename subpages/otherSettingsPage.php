@@ -1,18 +1,7 @@
 <?php
 include "composables/settingsFun.php";
 
-if (isset($_POST['act']) && $_POST['act'] === 'save') {
-    $mainColor = $_POST['mainColor'] ?? '#002fff';
-    $secColor  = $_POST['secColor'] ?? '#ffffff';
-    $userID    = $_POST['userID'] ?? '';
-    $siteName  = $_POST['siteName'] ?? '';
-    $defText   = $_POST['defText'] ?? '';
-    $email     = $_POST['email'] ?? '';
-    $contact   = $_POST['contact'] ?? '';
-    $layout    = $_POST['layout'] ?? '';
 
-    updateSettings($userID, $mainColor, $secColor, $siteName, $defText, $email, $contact, $layout, $db);
-}
 
 $con = $db->prepare("SELECT * FROM settings WHERE id = 1");
 $con->execute();
@@ -23,6 +12,32 @@ $valEmail     = $currentSettings['email'] ?? '';
 $valContact   = $currentSettings['contact'] ?? '';
 $valMainColor = $currentSettings['mainColour'] ?? '#002fff';
 $valSecColor  = $currentSettings['secColour'] ?? '#ffffff';
+
+
+
+
+if (isset($_POST['act']) && $_POST['act'] === 'save') {
+    $mainColorS = $_POST['mainColor'] ?? '#002fff';
+    $secColorS  = $_POST['secColor'] ?? '#ffffff';
+    $userID    = $_POST['userID'] ?? '';
+    $siteName  = $_POST['siteName'] ?? '';
+    $defText   = $_POST['defText'] ?? '';
+    $email     = $_POST['email'] ?? '';
+    $contact   = $_POST['contact'] ?? '';
+    $layout    = $_POST['layout'] ?? '';
+
+    if (checkHashtag($mainColorS)) {
+        $mainColor = $mainColorS;
+    } else {
+        $mainColor = $valMainColor;
+    }
+    if (checkHashtag($secColorS)) {
+        $secColor = $secColorS;
+    } else {
+        $secColor = $valSecColor;
+    }
+    updateSettings($userID, $mainColor, $secColor, $siteName, $defText, $email, $contact, $layout, $db);
+}
 ?>
 
 <form method="POST" action="">

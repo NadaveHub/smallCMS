@@ -69,9 +69,6 @@ function datatable($db)
         ?>
 </div>
 </div>
-</body>
-
-</html>
 
 <style>
     .datatable {

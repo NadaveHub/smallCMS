@@ -44,9 +44,6 @@ adminForm($db);
 
         <input type="submit" name="adminSubmit" value="Add Account">
     </form>
-    </body>
-
-    </html>
 
     <style>
         .datatable {
