@@ -5,7 +5,7 @@
       <ul class="nav flex-column mb-auto">
         <?php $userId = $_SESSION['activeUser'];
 
-         if (checkRole($db, $userId, "dash")) { ?>
+        if (checkRole($db, $userId, "dash")) { ?>
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'dashboard' ? 'active' : '' ?>" href="index.php?page=dashboard">
               <i class="bi bi-house-door"></i> Dashboard
@@ -35,15 +35,15 @@
               <i class="bi bi-slash-circle"></i> Bans
             </a>
           </li>
-        <?php } */?>
+        <?php } */ ?>
 
-        <?php if (checkRole($db, $userId, "addC")) { ?>
+        <?php /*if (checkRole($db, $userId, "addC")) { ?>
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'addContent' ? 'active' : '' ?>" href="index.php?page=addContent">
               <i class="bi bi-file-earmark-text"></i> Add Content
             </a>
           </li>
-        <?php } ?>
+        <?php } */ ?>
 
         <?php if (checkRole($db, $userId, "ediC")) { ?>
           <li class="nav-item">
@@ -56,7 +56,7 @@
         <?php if (checkRole($db, $userId, "otSe")) { ?>
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2 <?= $page === 'otherSettings' ? 'active' : '' ?>" href="index.php?page=otherSettings">
-              <i class="bi bi-gear"></i> Other Settings
+              <i class="bi bi-gear"></i>Settings
             </a>
           </li>
         <?php } ?>
